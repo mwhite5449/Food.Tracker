@@ -18,7 +18,7 @@
 <section class="card">
 <div class="row wrap"><h2 style="margin:0">Daily summary</h2><div class="row"><button class="secondary tiny" id="prev" aria-label="Previous day">‹</button><input class="date" id="date" type="date" aria-label="Selected date"><button class="secondary tiny" id="next" aria-label="Next day">›</button></div></div>
 <div class="row" style="margin-top:18px"><div><div class="muted small">Calories eaten</div><div class="metric" id="total">0</div></div><div style="text-align:right"><label for="goal" class="muted small" style="margin:0 0 5px">Daily goal</label><input id="goal" type="number" inputmode="numeric" min="1" max="20000" style="width:110px;text-align:right"></div></div>
-<div class="macros"><div class="macro"><strong id="carbsTotal">0 g</strong><span>Carbohydrates</span></div><div class="macro"><strong id="fatTotal">0 g</strong><span>Fat</span></div><div class="macro"><strong id="proteinTotal">0 g</strong><span>Protein</span></div></div><div class="row wrap" style="margin-top:12px"><button id="backfill" type="button" class="secondary tiny">Fill missing macros from food data</button><span id="backfillStatus" class="hint" role="status"></span></div><div class="progress" role="progressbar" aria-label="Daily calorie progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress"><div id="bar" class="bar"></div></div><div class="row"><span id="remaining" class="muted small"></span><span id="count" class="muted small"></span></div>
+<div class="macros"><div class="macro"><strong id="carbsTotal">0 g</strong><span>Carbohydrates</span></div><div class="macro"><strong id="fatTotal">0 g</strong><span>Fat</span></div><div class="macro"><strong id="proteinTotal">0 g</strong><span>Protein</span></div></div><div class="row wrap" style="margin-top:12px"><button id="backfill" type="button" class="secondary tiny">Recheck missing macros</button><span id="backfillStatus" class="hint" role="status"></span></div><div class="progress" role="progressbar" aria-label="Daily calorie progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress"><div id="bar" class="bar"></div></div><div class="row"><span id="remaining" class="muted small"></span><span id="count" class="muted small"></span></div>
 </section>
 <section class="card"><h2>🔎 Search food database</h2><p class="hint">Start typing a food or brand to see suggestions automatically. Select a result, enter the amount you ate, then add it as a meal. Internet required for search.</p><form id="searchForm"><label for="searchFood">Food or brand</label><div class="row"><input id="searchFood" type="search" placeholder="Start typing, e.g. Quaker oatmeal" minlength="2" autocomplete="off" required><button type="submit" id="searchBtn">Search</button></div></form><p id="searchStatus" class="hint search-status" role="status"></p><div id="searchResults" class="search-results"></div><p class="hint">Common foods are available even if the online database is unavailable.</p><div id="portionBox" class="hidden"><h2 style="margin-top:15px">Serving amount</h2><p id="selectedFood" class="muted"></p><label for="grams">Amount eaten (grams or mL for liquids)</label><input id="grams" type="number" min="1" max="10000" step="1" inputmode="decimal" value="100"><p id="portionCalories" class="pill"></p><div class="row wrap"><button id="useFood" type="button">Use this food</button><button id="closeFood" class="secondary" type="button">Cancel</button></div></div></section>
 <section class="card"><h2 id="formTitle">Add a meal</h2>
@@ -111,7 +111,47 @@ const knownMacros={
 'Egg':{carbs:0.4,fat:4.8,protein:6.3}
 };
 function fillMacros(m){for(const k of ['carbs','fat','protein'])$(k).value=m&&m[k]!==undefined?Math.round(m[k]*10)/10:''}
-function fillOldMacros(){
+async function autoFillOldMacros(){
+ const status=$('backfillStatus');status.textContent='Checking saved meals…';
+ let updated=0,unmatched=0;const before=entries.map(e=>({...e}));
+ for(const e of entries){
+  const missing=['carbs','fat','protein'].filter(k=>e[k]===undefined);
+  if(!missing.length)continue;
+  const match=commonFoods.find(f=>f.name.toLowerCase()===e.food.toLowerCase().trim());
+  const key=match&&Object.keys(knownMacros).find(k=>match.name.startsWith(k));
+  if(match&&key&&Math.abs(e.calories-match.kcal)<=Math.max(2,match.kcal*.05)){
+   for(const k of missing)if(knownMacros[key][k]!==undefined)e[k]=knownMacros[key][k];
+   updated++;continue;
+  }
+  // Require an exact product-name match and a plausible serving size; never guess based on similar names.
+  try{
+   const q=e.food.replace(/\s*[—–-]\s*1 (packet|scoop|cup).*$/i,'').trim();
+   if(q.length<4){unmatched++;continue}
+   const params=new URLSearchParams({search_terms:q,page_size:'30',countries_tags:'en:united-states',fields:'product_name,product_name_en,brands,serving_size,nutriments'});
+   const response=await fetch(api+'?'+params.toString());
+   if(!response.ok)throw Error('Unavailable');
+   const data=await response.json();
+   const normalize=v=>String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+   const target=normalize(q);
+   const candidates=(data.products||[]).filter(p=>normalize(p.product_name_en||p.product_name)===target&&energyPer100(p)>0);
+   // Only fill when exactly one unambiguous nutritional profile is available.
+   const profiles=candidates.map(p=>({p,m:productMacros(p)})).filter(x=>missing.every(k=>x.m[k]!==undefined));
+   if(!profiles.length){unmatched++;continue}
+   const servingGrams=Number(String(profiles[0].p.serving_size||'').match(/([\d.]+)\s*g/i)?.[1]);
+   const grams=servingGrams>0&&servingGrams<=500?servingGrams:null;
+   if(!grams){unmatched++;continue}
+   const matching=profiles.filter(x=>Math.abs(x.p.nutriments['energy-kcal_100g']*grams/100-e.calories)<=Math.max(5,e.calories*.08));
+   if(!matching.length){unmatched++;continue}
+   const first=matching[0].m;
+   if(matching.some(x=>missing.some(k=>Math.abs(x.m[k]-first[k])>1))){unmatched++;continue}
+   for(const k of missing)e[k]=Math.round(first[k]*grams)/10;
+   updated++;
+  }catch(err){unmatched++}
+ }
+ if(updated&&!save()){entries=before;status.textContent='Unable to save updates.';return}
+ render();status.textContent=updated+' saved meal'+(updated===1?'':'s')+' updated automatically; '+unmatched+' could not be matched safely.';
+}
+function fillOldMacros(){autoFillOldMacros();return;
  let updated=0,skipped=0;const before=entries.map(e=>({...e}));
  for(const e of entries){
   const missing=['carbs','fat','protein'].filter(k=>e[k]===undefined);
@@ -198,6 +238,8 @@ $('useFood').addEventListener('click',()=>{
  $('portionBox').classList.add('hidden');$('formTitle').scrollIntoView({behavior:'smooth',block:'start'});$('searchStatus').textContent='Food selected. Choose meal type and tap Add meal to save.';
 });
 render();
+// Run once after each load; only missing values are eligible for filling.
+setTimeout(()=>{if(entries.some(e=>['carbs','fat','protein'].some(k=>e[k]===undefined)))autoFillOldMacros()},300);
 })();
 </script>
 </body></html>
