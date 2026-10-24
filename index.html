@@ -86,7 +86,9 @@ const commonFoods=[
 {name:'Granulated Sugar — 1 tablespoon',kcal:49,amount:'1 tablespoon (12.5 g)',terms:'sugar granulated white tablespoon'},
 {name:'Banana — 1 medium',kcal:105,amount:'1 medium banana',terms:'banana fruit'},
 {name:'Egg — 1 large',kcal:72,amount:'1 large egg',terms:'egg chicken'},
-{name:'Quaker Instant Oatmeal Maple & Brown Sugar — 1 packet',kcal:160,amount:'1 packet (check label)',terms:'quaker oatmeal oats instant maple brown sugar packet'}
+{name:'Quaker Instant Oatmeal Maple & Brown Sugar — 1 packet',kcal:160,amount:'1 packet (check label)',terms:'quaker oatmeal oats instant maple brown sugar packet'},
+{name:'RYSE Loaded Protein — Vanilla Ice Cream — 1 scoop',kcal:130,amount:'1 scoop (35 g); check your container label',terms:'ryse protein powder loaded whey vanilla ice cream shake'},
+{name:'RYSE Loaded Protein — Cinnamon Toast — 1 scoop',kcal:140,amount:'1 scoop (36 g); check your container label',terms:'ryse protein powder loaded whey cinnamon toast shake'}
 ];
 function commonMatches(q){const terms=q.toLowerCase().trim().split(/\s+/);return commonFoods.filter(f=>terms.every(t=>(f.name+' '+f.terms).toLowerCase().includes(t)))}
 function commonResult(f){
