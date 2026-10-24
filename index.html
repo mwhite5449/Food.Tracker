@@ -30,7 +30,7 @@
 <div class="row"><button type="submit" id="submit" style="flex:1">+ Add meal</button><button type="button" id="cancel" class="secondary hidden">Cancel</button></div>
 </form></section>
 <section class="card"><div class="row"><h2 style="margin:0">Meals for selected day</h2><button class="secondary tiny" id="today">Today</button></div><div id="meals" aria-live="polite"></div></section>
-<section class="card"><h2>Recent days</h2><div id="history"></div></section>
+<section class="card"><h2>Other days</h2><div id="history"></div></section>
 <section class="card"><h2>Back up your meals</h2><p class="hint">Your entries stay in this browser's storage, not in the public GitHub repository. Browser data removal, private browsing, or changing devices can erase them. Export backups regularly.</p><div class="row wrap"><button class="secondary" id="export" type="button">Download backup</button><button class="secondary" id="import" type="button">Import backup</button><input id="backup" class="hidden" type="file" accept=".json,application/json"></div><p id="backupStatus" class="hint" role="status"></p></section>
 <footer>Food Tracker • Food data from Open Food Facts contributors. Verify labels and portions. Meals are stored locally.</footer>
 </main>
@@ -54,7 +54,7 @@ const total=items.reduce((sum,e)=>sum+e.calories,0),g=goal(),pct=Math.round(tota
 $('total').textContent=total.toLocaleString();$('bar').style.width=Math.min(100,pct)+'%';$('bar').classList.toggle('over',total>g);$('progress').setAttribute('aria-valuenow',Math.min(100,pct));
 $('remaining').textContent=total<=g?(g-total).toLocaleString()+' calories remaining':(total-g).toLocaleString()+' calories over goal';$('count').textContent=items.length+' meal'+(items.length===1?'':'s');
 $('meals').innerHTML=items.length?items.map(e=>'<div class="meal row tight"><div><div class="meal-name">'+escapeHtml(e.food)+'</div><div class="meal-info">'+escapeHtml(e.category)+' · '+e.calories.toLocaleString()+' cal'+(e.notes?' · '+escapeHtml(e.notes):'')+'</div></div><div class="row" style="gap:5px"><button type="button" class="secondary tiny" data-edit="'+escapeHtml(e.id)+'">Edit</button><button type="button" class="danger tiny" data-delete="'+escapeHtml(e.id)+'">Delete</button></div></div>').join(''):'<p class="muted">No meals logged for this day. Add one above!</p>';
-const dates=[...new Set(entries.map(e=>e.date))].sort().reverse().slice(0,10);
+const dates=[...new Set(entries.map(e=>e.date).filter(d=>d!==date))].sort().reverse().slice(0,10);
 $('history').innerHTML=dates.length?dates.map(d=>{const a=entries.filter(e=>e.date===d);return '<div class="dayrow"><div><strong>'+escapeHtml(d)+'</strong><div class="muted small">'+a.length+' meal'+(a.length===1?'':'s')+'</div></div><div style="text-align:right"><strong>'+a.reduce((s,e)=>s+e.calories,0).toLocaleString()+' cal</strong><div><button type="button" class="secondary tiny" data-day="'+escapeHtml(d)+'">View</button></div></div></div>'}).join(''):'<p class="muted">Your logged days will appear here.</p>';
 }
 function resetForm(){editing=null;$('mealForm').reset();$('formTitle').textContent='Add a meal';$('submit').textContent='+ Add meal';$('cancel').classList.add('hidden');$('error').textContent=''}
