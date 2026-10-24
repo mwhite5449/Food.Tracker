@@ -26,7 +26,7 @@
 <section class="card"><h2>🔎 Search food database</h2><p class="hint">Start typing a food or brand to see suggestions automatically. Select a result, enter the amount you ate, then add it as a meal. Internet required for search.</p><form id="searchForm"><label for="searchFood">Food or brand</label><div class="row"><input id="searchFood" type="search" placeholder="Start typing, e.g. Quaker oatmeal" minlength="2" autocomplete="off" required><button type="submit" id="searchBtn">Search</button></div></form><p id="searchStatus" class="hint search-status" role="status"></p><div id="searchResults" class="search-results"></div><p class="hint">Common foods are available even if the online database is unavailable.</p><div id="portionBox" class="hidden"><h2 style="margin-top:15px">Serving amount</h2><p id="selectedFood" class="muted"></p><label for="grams">Amount eaten (grams or mL for liquids)</label><input id="grams" type="number" min="1" max="10000" step="1" inputmode="decimal" value="100"><p id="portionCalories" class="pill"></p><div class="row wrap"><button id="useFood" type="button">Use this food</button><button id="closeFood" class="secondary" type="button">Cancel</button></div></div></section>
 <section class="card"><h2 id="formTitle">Add a meal</h2>
 <form id="mealForm">
-<div class="two"><div><label for="category">Meal type</label><select id="category"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option></select></div><div><label for="calories">Calories</label><input id="calories" type="number" min="1" max="20000" step="1" inputmode="numeric" required placeholder="e.g. 450"></div></div>
+<div class="two"><div><label for="category">Meal type</label><select id="category"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option></select></div><div><label for="calories">Calories</label><input id="calories" type="number" min="0" max="20000" step="1" inputmode="numeric" required placeholder="e.g. 450"></div></div>
 <div class="macro-inputs"><div><label for="carbs">Carbs (g)</label><input id="carbs" type="number" min="0" max="2000" step="0.1" inputmode="decimal" placeholder="Optional"></div><div><label for="fat">Fat (g)</label><input id="fat" type="number" min="0" max="2000" step="0.1" inputmode="decimal" placeholder="Optional"></div><div><label for="protein">Protein (g)</label><input id="protein" type="number" min="0" max="2000" step="0.1" inputmode="decimal" placeholder="Optional"></div></div><label for="food">Food or meal name</label><input id="food" maxlength="120" required placeholder="e.g. Turkey sandwich" autocomplete="off">
 <label for="notes">Notes (optional)</label><input id="notes" maxlength="240" placeholder="e.g. with chips" autocomplete="off">
 <p id="error" class="error" role="alert"></p>
@@ -46,7 +46,7 @@ const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth
 const safeDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(s);
 let entries=[],editing=null,selectedProduct=null;
 try{const parsed=JSON.parse(localStorage.getItem(STORE)||'[]');if(Array.isArray(parsed))entries=parsed.filter(validEntry)}catch(e){}
-function validEntry(x){return x&&typeof x.id==='string'&&safeDate(x.date)&&typeof x.food==='string'&&x.food.length<=120&&Number.isInteger(x.calories)&&x.calories>0&&x.calories<=20000&&['Breakfast','Lunch','Dinner','Snack'].includes(x.category)&&typeof x.created==='number'&&['carbs','fat','protein'].every(k=>x[k]===undefined||(typeof x[k]==='number'&&Number.isFinite(x[k])&&x[k]>=0&&x[k]<=2000))&&(x.notes===undefined||(typeof x.notes==='string'&&x.notes.length<=240))}
+function validEntry(x){return x&&typeof x.id==='string'&&safeDate(x.date)&&typeof x.food==='string'&&x.food.length<=120&&Number.isInteger(x.calories)&&x.calories>=0&&x.calories<=20000&&['Breakfast','Lunch','Dinner','Snack'].includes(x.category)&&typeof x.created==='number'&&['carbs','fat','protein'].every(k=>x[k]===undefined||(typeof x[k]==='number'&&Number.isFinite(x[k])&&x[k]>=0&&x[k]<=2000))&&(x.notes===undefined||(typeof x.notes==='string'&&x.notes.length<=240))}
 function save(){try{localStorage.setItem(STORE,JSON.stringify(entries));return true}catch(e){$('error').textContent='Could not save. Check browser storage or available space.';return false}}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 $('date').value=today();const savedGoal=Number(localStorage.getItem(GOAL));$('goal').value=Number.isInteger(savedGoal)&&savedGoal>0&&savedGoal<=20000?savedGoal:2000;
@@ -66,7 +66,7 @@ $('history').innerHTML=dates.length?dates.map(d=>{const a=entries.filter(e=>e.da
 function resetForm(){editing=null;$('mealForm').reset();$('formTitle').textContent='Add a meal';$('submit').textContent='+ Add meal';$('cancel').classList.add('hidden');$('error').textContent=''}
 $('mealForm').addEventListener('submit',e=>{e.preventDefault();$('error').textContent='';const food=$('food').value.trim(),notes=$('notes').value.trim(),cal=Number($('calories').value),category=$('category').value;
 const macros={};for(const k of ['carbs','fat','protein']){const raw=$(k).value.trim();if(raw!==''){const n=Number(raw);if(!Number.isFinite(n)||n<0||n>2000){$('error').textContent='Macros must be between 0 and 2,000 grams.';return}macros[k]=Math.round(n*10)/10}}
-if(!food||!Number.isInteger(cal)||cal<1||cal>20000){$('error').textContent='Enter a meal name and whole-number calories from 1 to 20,000.';return}
+if(!food||!Number.isInteger(cal)||cal<0||cal>20000){$('error').textContent='Enter a meal name and whole-number calories from 0 to 20,000.';return}
 const original=entries.slice();if(editing){const item=entries.find(e=>e.id===editing);if(!item){resetForm();return}Object.assign(item,{food,notes,calories:cal,category});for(const k of ['carbs','fat','protein']){delete item[k];if(macros[k]!==undefined)item[k]=macros[k]}}else{entries.push({id:String(Date.now())+'-'+Math.random().toString(36).slice(2),date:$('date').value,food,notes,calories:cal,category,...macros,created:Date.now()})}
 if(!save()){entries=original;return}resetForm();render()});
 $('cancel').addEventListener('click',resetForm);
@@ -95,6 +95,11 @@ const commonFoods=[
 {name:'Strawberries — 100 g',kcal:32,amount:'100 g',terms:'strawberry strawberries fresh fruit berry'},
 {name:'Strawberries — 1 medium berry',kcal:4,amount:'1 medium strawberry (about 12 g)',terms:'strawberry strawberries fresh fruit berry'},
 {name:'Banana — 1 medium',kcal:105,amount:'1 medium banana',terms:'banana fruit'},
+{name:'Orange — 1 medium',kcal:62,amount:'1 medium orange (about 131 g edible portion)',terms:'orange oranges fresh citrus fruit'},
+{name:'Orange — 100 g',kcal:47,amount:'100 g orange',terms:'orange oranges fresh citrus fruit'},
+{name:'Coca-Cola Original Taste — 12 fl oz can',kcal:140,amount:'1 can (12 fl oz / 355 mL)',terms:'coke coca cola coca-cola original classic soda soft drink'},
+{name:'Coca-Cola Original Taste — 20 fl oz bottle',kcal:240,amount:'1 bottle (20 fl oz / 591 mL)',terms:'coke coca cola coca-cola original classic soda soft drink'},
+{name:'Diet Coke — 12 fl oz can',kcal:0,amount:'1 can (12 fl oz / 355 mL)',terms:'diet coke coca cola coca-cola soda soft drink'},
 {name:'Egg — 1 large',kcal:72,amount:'1 large egg',terms:'egg chicken'},
 {name:'Quaker Instant Oatmeal Maple & Brown Sugar — 1 packet',kcal:160,amount:'1 packet (check label)',terms:'quaker oatmeal oats instant maple brown sugar packet'},
 {name:'RYSE Loaded Protein — Vanilla Ice Cream — 1 scoop',kcal:130,amount:'1 scoop (35 g); check your container label',terms:'ryse protein powder loaded whey vanilla ice cream shake'},
@@ -112,6 +117,11 @@ const knownMacros={
 'Strawberries — 100 g':{carbs:7.7,fat:0.3,protein:0.7},
 'Strawberries — 1 medium':{carbs:0.9,fat:0,protein:0.1},
 'Banana':{carbs:27,fat:0.4,protein:1.3},
+'Orange — 1 medium':{carbs:15.4,fat:0.2,protein:1.2},
+'Orange — 100 g':{carbs:11.8,fat:0.1,protein:0.9},
+'Coca-Cola Original Taste — 12 fl oz':{carbs:39,fat:0,protein:0},
+'Coca-Cola Original Taste — 20 fl oz':{carbs:65,fat:0,protein:0},
+'Diet Coke':{carbs:0,fat:0,protein:0},
 'Egg':{carbs:0.4,fat:4.8,protein:6.3},
 'Quaker Instant Oatmeal Maple & Brown Sugar':{carbs:33,fat:2,protein:4},
 'RYSE Loaded Protein — Little Debbie Strawberry Shortcake Rolls':{carbs:3,fat:2.5,protein:25}
@@ -186,7 +196,7 @@ function fillOldMacros(){autoFillOldMacros();return;
  $('backfillStatus').textContent=updated+' meal'+(updated===1?'':'s')+' updated; '+skipped+' need manual review. Existing calories were not changed.';
 }
 $('backfill').addEventListener('click',fillOldMacros);
-function commonMatches(q){const terms=q.toLowerCase().trim().split(/\s+/);return commonFoods.filter(f=>terms.every(t=>(f.name+' '+f.terms).toLowerCase().includes(t)))}
+function commonMatches(q){const terms=q.toLowerCase().trim().replace(/coke\s*a\s*cola/g,'coca cola').split(/\s+/);return commonFoods.filter(f=>terms.every(t=>(f.name+' '+f.terms).toLowerCase().includes(t)))}
 function commonResult(f){
  const item=document.createElement('div');item.className='search-result';
  const name=document.createElement('strong');name.textContent=f.name;item.appendChild(name);
@@ -213,13 +223,13 @@ async function searchFoods(){
  const q=$('searchFood').value.trim();if(q.length<2){$('searchResults').textContent='';$('searchStatus').textContent='Type at least 2 characters to search.';return}
  const sequence=++searchSequence;
  if(searchController)searchController.abort();searchController=new AbortController();
- $('searchBtn').disabled=true;$('searchStatus').textContent='Searching foods…';$('searchResults').textContent='';$('portionBox').classList.add('hidden');selectedProduct=null;
+ $('searchBtn').disabled=true;$('searchStatus').textContent='Searching online; common foods are shown below…';showCommon(q);$('portionBox').classList.add('hidden');selectedProduct=null;
  try{
  const params=new URLSearchParams({search_terms:q,page_size:'30',countries_tags:'en:united-states',fields:'code,product_name,product_name_en,brands,quantity,serving_size,nutriments'});
  const response=await fetch(api+'?'+params.toString(),{signal:searchController.signal});
  if(sequence!==searchSequence)return;
  if(!response.ok)throw Error('Food database temporarily unavailable ('+response.status+').');
- const data=await response.json();if(sequence!==searchSequence)return;const queryTerms=q.toLowerCase().split(/\\s+/).filter(Boolean);const products=(data.products||[]).map(p=>({...p,displayName:p.product_name_en||p.product_name,kcal:energyPer100(p)})).filter(p=>p.displayName&&p.kcal!==null&&/^[\\x20-\\x7E]+$/.test(p.displayName)&&queryTerms.every(t=>(p.displayName+' '+(p.brands||'')).toLowerCase().includes(t))).slice(0,12);
+ const data=await response.json();if(sequence!==searchSequence)return;const queryTerms=q.toLowerCase().split(/\s+/).filter(Boolean);const products=(data.products||[]).map(p=>({...p,displayName:p.product_name_en||p.product_name,kcal:energyPer100(p)})).filter(p=>p.displayName&&p.kcal!==null&&/^[\x20-\x7E]+$/.test(p.displayName)&&queryTerms.every(t=>(p.displayName+' '+(p.brands||'')).toLowerCase().includes(t))).slice(0,12);
  const commonCount=showCommon(q);$('searchStatus').textContent=products.length||commonCount?'Choose a matching food or serving below.':'No foods with calorie data found. Try a different search or enter manually.';
  products.forEach(p=>{
  const item=document.createElement('div');item.className='search-result';
@@ -247,7 +257,7 @@ $('grams').addEventListener('input',showPortion);
 $('closeFood').addEventListener('click',()=>{$('portionBox').classList.add('hidden');selectedProduct=null});
 $('useFood').addEventListener('click',()=>{
  if(!selectedProduct)return;const g=Number($('grams').value);if(!Number.isFinite(g)||g<=0||g>10000){$('searchStatus').textContent='Enter an amount between 1 and 10,000.';return}
- const c=Math.round(selectedProduct.kcal*g/100);if(c<1||c>20000){$('searchStatus').textContent='This portion is outside the supported calorie range.';return}
+ const c=Math.round(selectedProduct.kcal*g/100);if(c<0||c>20000){$('searchStatus').textContent='This portion is outside the supported calorie range.';return}
  resetForm();$('food').value=selectedProduct.name.slice(0,120);$('calories').value=c;fillMacros(Object.fromEntries(Object.entries(selectedProduct.macros).map(([k,v])=>[k,v*g/100])));$('notes').value=(g+' g'+(selectedProduct.brand?' · '+selectedProduct.brand:'')).slice(0,240);
  $('portionBox').classList.add('hidden');$('formTitle').scrollIntoView({behavior:'smooth',block:'start'});$('searchStatus').textContent='Food selected. Choose meal type and tap Add meal to save.';
 });
