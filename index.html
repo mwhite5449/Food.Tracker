@@ -17,7 +17,7 @@
 </head>
 <body>
 <main>
-<header><div class="pill">Free • Private on this device</div><div style="display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-top:12px"><h1>🥗 Food Tracker</h1><span id="appVersion" style="font-size:13px;font-weight:700;color:#607266;white-space:nowrap" aria-label="App version">v1.1.0</span></div><p class="sub">Track meals, calories, carbohydrates, fat, protein, and daily progress.</p></header>
+<header><div class="pill">Free • Private on this device</div><div style="display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-top:12px"><h1>🥗 Food Tracker</h1><span id="appVersion" style="font-size:13px;font-weight:700;color:#607266;white-space:nowrap" aria-label="App version">v1.1.1</span></div><p class="sub">Track meals, calories, carbohydrates, fat, protein, and daily progress.</p></header>
 <section class="card">
 <div class="row wrap"><h2 style="margin:0">Daily summary</h2><div class="row"><button class="secondary tiny" id="prev" aria-label="Previous day">‹</button><input class="date" id="date" type="date" aria-label="Selected date"><button class="secondary tiny" id="next" aria-label="Next day">›</button></div></div>
 <div class="row" style="margin-top:18px"><div><div class="muted small">Calories eaten</div><div class="metric" id="total">0</div></div><div style="text-align:right"><label for="goal" class="muted small" style="margin:0 0 5px">Daily goal</label><input id="goal" type="number" inputmode="numeric" min="1" max="20000" style="width:110px;text-align:right"></div></div>
@@ -101,6 +101,9 @@ const commonFoods=[
 {name:'Coca-Cola Original Taste — 20 fl oz bottle',kcal:240,amount:'1 bottle (20 fl oz / 591 mL)',terms:'coke coca cola coca-cola original classic soda soft drink'},
 {name:'Coca-Cola Original Taste — 500 mL bottle',kcal:200,amount:'1 bottle (500 mL / 16.9 fl oz)',terms:'coke coca cola coca-cola original classic soda soft drink 500ml 500 ml'},
 {name:'Diet Coke — 12 fl oz can',kcal:0,amount:'1 can (12 fl oz / 355 mL)',terms:'diet coke coca cola coca-cola soda soft drink'},
+{name:"Campbell's Condensed Vegetable Beef Soup — 1/2 cup condensed",kcal:90,amount:'1/2 cup (120 mL) condensed soup, before adding water',terms:'campbell campbells vegetable beef soup condensed'},
+{name:"Campbell's Condensed Vegetable Beef Soup — whole 10.5 oz can",kcal:225,amount:'1 can (10.5 oz), about 2.5 condensed servings',terms:'campbell campbells vegetable beef soup condensed can'},
+{name:"Campbell's Chunky Old Fashioned Vegetable Beef Soup — 1 cup",kcal:110,amount:'1 cup (240 mL) ready-to-eat soup',terms:'campbell campbells chunky old fashioned vegetable beef soup'},
 {name:'Egg — 1 large',kcal:72,amount:'1 large egg',terms:'egg chicken'},
 {name:'Quaker Instant Oatmeal Maple & Brown Sugar — 1 packet',kcal:160,amount:'1 packet (check label)',terms:'quaker oatmeal oats instant maple brown sugar packet'},
 {name:'RYSE Loaded Protein — Vanilla Ice Cream — 1 scoop',kcal:130,amount:'1 scoop (35 g); check your container label',terms:'ryse protein powder loaded whey vanilla ice cream shake'},
@@ -124,6 +127,9 @@ const knownMacros={
 'Coca-Cola Original Taste — 20 fl oz':{carbs:65,fat:0,protein:0},
 'Coca-Cola Original Taste — 500 mL':{carbs:55,fat:0,protein:0},
 'Diet Coke':{carbs:0,fat:0,protein:0},
+"Campbell's Condensed Vegetable Beef Soup — 1/2 cup":{carbs:15,fat:1,protein:4},
+"Campbell's Condensed Vegetable Beef Soup — whole":{carbs:37.5,fat:2.5,protein:10},
+"Campbell's Chunky Old Fashioned Vegetable Beef Soup":{carbs:17,fat:2,protein:7},
 'Egg':{carbs:0.4,fat:4.8,protein:6.3},
 'Quaker Instant Oatmeal Maple & Brown Sugar':{carbs:33,fat:2,protein:4},
 'RYSE Loaded Protein — Little Debbie Strawberry Shortcake Rolls':{carbs:3,fat:2.5,protein:25}
