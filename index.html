@@ -20,7 +20,7 @@
 <div class="row" style="margin-top:18px"><div><div class="muted small">Calories eaten</div><div class="metric" id="total">0</div></div><div style="text-align:right"><label for="goal" class="muted small" style="margin:0 0 5px">Daily goal</label><input id="goal" type="number" inputmode="numeric" min="1" max="20000" style="width:110px;text-align:right"></div></div>
 <div class="progress" role="progressbar" aria-label="Daily calorie progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress"><div id="bar" class="bar"></div></div><div class="row"><span id="remaining" class="muted small"></span><span id="count" class="muted small"></span></div>
 </section>
-<section class="card"><h2>🔎 Search food database</h2><p class="hint">Start typing a food or brand to see suggestions automatically. Select a result, enter the amount you ate, then add it as a meal. Internet required for search.</p><form id="searchForm"><label for="searchFood">Food or brand</label><div class="row"><input id="searchFood" type="search" placeholder="Start typing, e.g. Quaker oatmeal" minlength="2" autocomplete="off" required><button type="submit" id="searchBtn">Search</button></div></form><p id="searchStatus" class="hint search-status" role="status"></p><div id="searchResults" class="search-results"></div><div id="portionBox" class="hidden"><h2 style="margin-top:15px">Serving amount</h2><p id="selectedFood" class="muted"></p><label for="grams">Amount eaten (grams or mL for liquids)</label><input id="grams" type="number" min="1" max="10000" step="1" inputmode="decimal" value="100"><p id="portionCalories" class="pill"></p><div class="row wrap"><button id="useFood" type="button">Use this food</button><button id="closeFood" class="secondary" type="button">Cancel</button></div></div></section>
+<section class="card"><h2>🔎 Search food database</h2><p class="hint">Start typing a food or brand to see suggestions automatically. Select a result, enter the amount you ate, then add it as a meal. Internet required for search.</p><form id="searchForm"><label for="searchFood">Food or brand</label><div class="row"><input id="searchFood" type="search" placeholder="Start typing, e.g. Quaker oatmeal" minlength="2" autocomplete="off" required><button type="submit" id="searchBtn">Search</button></div></form><p id="searchStatus" class="hint search-status" role="status"></p><div id="searchResults" class="search-results"></div><p class="hint">Common foods are available even if the online database is unavailable.</p><div id="portionBox" class="hidden"><h2 style="margin-top:15px">Serving amount</h2><p id="selectedFood" class="muted"></p><label for="grams">Amount eaten (grams or mL for liquids)</label><input id="grams" type="number" min="1" max="10000" step="1" inputmode="decimal" value="100"><p id="portionCalories" class="pill"></p><div class="row wrap"><button id="useFood" type="button">Use this food</button><button id="closeFood" class="secondary" type="button">Cancel</button></div></div></section>
 <section class="card"><h2 id="formTitle">Add a meal</h2>
 <form id="mealForm">
 <div class="two"><div><label for="category">Meal type</label><select id="category"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option></select></div><div><label for="calories">Calories</label><input id="calories" type="number" min="1" max="20000" step="1" inputmode="numeric" required placeholder="e.g. 450"></div></div>
@@ -76,7 +76,28 @@ $('import').addEventListener('click',()=>$('backup').click());
 $('backup').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>5e6)throw Error('Backup is too large.');const data=JSON.parse(await file.text());if(!data||!Array.isArray(data.entries)||!data.entries.every(validEntry))throw Error('Invalid food tracker backup.');if(!confirm('Import '+data.entries.length+' meals? Matching entries will be updated; other existing meals will remain.'))return;const old=entries;const byId=new Map(entries.map(x=>[x.id,x]));data.entries.forEach(x=>byId.set(x.id,x));entries=[...byId.values()];if(!save()){entries=old;return}if(Number.isInteger(data.goal)&&data.goal>0&&data.goal<=20000){$('goal').value=data.goal;try{localStorage.setItem(GOAL,String(data.goal))}catch(e){}}resetForm();render();$('backupStatus').textContent='Backup imported successfully.'}catch(err){$('backupStatus').textContent='Import failed: '+err.message}finally{e.target.value=''}});
 
 // Open Food Facts public search: results are approximate and depend on contributed labels.
-const api='https://world.openfoodfacts.org/cgi/search.pl';
+const api='https://world.openfoodfacts.org/api/v2/search';
+const commonFoods=[
+{name:'2% Milk — 1 cup (8 fl oz)',kcal:122,amount:'1 cup (8 fl oz)',terms:'milk 2 percent reduced fat dairy cup'},
+{name:'Whole Milk — 1 cup (8 fl oz)',kcal:149,amount:'1 cup (8 fl oz)',terms:'milk whole dairy cup'},
+{name:'1% Milk — 1 cup (8 fl oz)',kcal:102,amount:'1 cup (8 fl oz)',terms:'milk 1 percent low fat dairy cup'},
+{name:'Skim Milk — 1 cup (8 fl oz)',kcal:83,amount:'1 cup (8 fl oz)',terms:'milk skim fat free dairy cup'},
+{name:'Granulated Sugar — 1 teaspoon',kcal:16,amount:'1 teaspoon (4 g)',terms:'sugar granulated white teaspoon'},
+{name:'Granulated Sugar — 1 tablespoon',kcal:49,amount:'1 tablespoon (12.5 g)',terms:'sugar granulated white tablespoon'},
+{name:'Banana — 1 medium',kcal:105,amount:'1 medium banana',terms:'banana fruit'},
+{name:'Egg — 1 large',kcal:72,amount:'1 large egg',terms:'egg chicken'},
+{name:'Quaker Instant Oatmeal Maple & Brown Sugar — 1 packet',kcal:160,amount:'1 packet (check label)',terms:'quaker oatmeal oats instant maple brown sugar packet'}
+];
+function commonMatches(q){const terms=q.toLowerCase().trim().split(/\s+/);return commonFoods.filter(f=>terms.every(t=>(f.name+' '+f.terms).toLowerCase().includes(t)))}
+function commonResult(f){
+ const item=document.createElement('div');item.className='search-result';
+ const name=document.createElement('strong');name.textContent=f.name;item.appendChild(name);
+ const desc=document.createElement('div');desc.className='hint';desc.textContent=f.kcal+' calories · '+f.amount+' · Approximate reference value';item.appendChild(desc);
+ const btn=document.createElement('button');btn.type='button';btn.className='secondary tiny';btn.textContent='Use this serving';
+ btn.addEventListener('click',()=>{resetForm();$('food').value=f.name.slice(0,120);$('calories').value=f.kcal;$('notes').value=f.amount;$('formTitle').scrollIntoView({behavior:'smooth',block:'start'});$('searchStatus').textContent='Serving selected. Choose meal type and tap Add meal to save.'});
+ item.appendChild(btn);$('searchResults').appendChild(item);
+}
+function showCommon(q){$('searchResults').textContent='';const matches=commonMatches(q);matches.forEach(commonResult);return matches.length}
 let searchTimer=null,searchSequence=0,searchController=null;
 function energyPer100(p){
  const n=p.nutriments||{};
@@ -95,12 +116,12 @@ async function searchFoods(){
  if(searchController)searchController.abort();searchController=new AbortController();
  $('searchBtn').disabled=true;$('searchStatus').textContent='Searching foods…';$('searchResults').textContent='';$('portionBox').classList.add('hidden');selectedProduct=null;
  try{
- const params=new URLSearchParams({search_terms:q,search_simple:'1',action:'process',json:'1',page_size:'20',fields:'code,product_name,brands,quantity,serving_size,nutriments'});
- const response=await fetch(api+'?'+params.toString(),{headers:{Accept:'application/json'},signal:searchController.signal});
+ const params=new URLSearchParams({search_terms:q,page_size:'20',fields:'code,product_name,brands,quantity,serving_size,nutriments'});
+ const response=await fetch(api+'?'+params.toString(),{signal:searchController.signal});
  if(sequence!==searchSequence)return;
  if(!response.ok)throw Error('Food database temporarily unavailable ('+response.status+').');
  const data=await response.json();if(sequence!==searchSequence)return;const products=(data.products||[]).map(p=>({...p,kcal:energyPer100(p)})).filter(p=>p.product_name&&p.kcal!==null).slice(0,15);
- $('searchStatus').textContent=products.length?products.length+' foods found. Choose a product.':'No foods with calorie data found. Try a different search or enter manually.';
+ const commonCount=showCommon(q);$('searchStatus').textContent=products.length||commonCount?'Choose a matching food or serving below.':'No foods with calorie data found. Try a different search or enter manually.';
  products.forEach(p=>{
  const item=document.createElement('div');item.className='search-result';
  const name=document.createElement('strong');name.textContent=p.product_name;item.appendChild(name);
@@ -111,16 +132,16 @@ async function searchFoods(){
  $('grams').value='100';$('portionBox').classList.remove('hidden');showPortion();$('portionBox').scrollIntoView({behavior:'smooth',block:'nearest'});
  });item.appendChild(btn);$('searchResults').appendChild(item);
  });
- }catch(err){if(err.name!=='AbortError'&&sequence===searchSequence)$('searchStatus').textContent='Search failed: '+err.message+' You can still add foods manually.'}
+ }catch(err){if(err.name!=='AbortError'&&sequence===searchSequence){const count=showCommon(q);$('searchStatus').textContent=count?'Showing built-in foods. Online search is temporarily unavailable.':'Online search is unavailable. Try milk, sugar, egg, or banana, or enter food manually.'}}
  finally{if(sequence===searchSequence)$('searchBtn').disabled=false}
 }
 $('searchForm').addEventListener('submit',e=>{e.preventDefault();clearTimeout(searchTimer);searchFoods()});
 $('searchFood').addEventListener('input',()=>{
  clearTimeout(searchTimer);searchSequence++;
  if(searchController)searchController.abort();
- const q=$('searchFood').value.trim();$('searchResults').textContent='';$('portionBox').classList.add('hidden');selectedProduct=null;
- if(q.length<2){$('searchStatus').textContent=q?'Type one more character to search.':'Start typing to search foods.';$('searchBtn').disabled=false;return}
- $('searchStatus').textContent='Waiting for you to finish typing…';
+ const q=$('searchFood').value.trim();showCommon(q);$('portionBox').classList.add('hidden');selectedProduct=null;
+ if(q.length<2){$('searchResults').textContent='';$('searchStatus').textContent=q?'Type one more character to search.':'Start typing to search foods.';$('searchBtn').disabled=false;return}
+ $('searchStatus').textContent='Showing common foods; checking online database…';
  searchTimer=setTimeout(searchFoods,500);
 });
 $('grams').addEventListener('input',showPortion);
