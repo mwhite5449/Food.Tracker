@@ -4,9 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#166534">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Food Tracker">
+<meta name="apple-touch-fullscreen" content="yes">
 <title>Food Tracker • Meals & Calories</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#182820;background:#f3f7f2;font-size:16px}*{box-sizing:border-box}body{margin:0}main{max-width:740px;margin:auto;padding:24px 16px 75px}h1{font-size:32px;letter-spacing:-1px;margin:0}h2{font-size:20px;margin:0 0 14px}p{line-height:1.5}.sub{color:#607266;margin:5px 0 20px}.card{background:#fff;border:1px solid #e2eae2;border-radius:18px;padding:20px;margin:16px 0;box-shadow:0 3px 16px #183e2010}.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.wrap{flex-wrap:wrap}.metric{font-size:40px;font-weight:800;letter-spacing:-1.5px}.muted{color:#637267}.small{font-size:13px}.progress{height:13px;background:#e5eee6;border-radius:20px;overflow:hidden;margin:16px 0 7px}.bar{height:100%;width:0;background:#16a34a;transition:width .2s}.bar.over{background:#e19b35}label{display:block;font-weight:650;margin:13px 0 6px}input,select,button{font:inherit;min-height:46px;border-radius:10px}input,select{width:100%;padding:10px 12px;border:1px solid #b9c9bd;background:white;color:#182820}input:focus,select:focus{outline:2px solid #6fb981;outline-offset:1px}button{padding:10px 16px;border:0;background:#166534;color:white;font-weight:700;cursor:pointer}button:active{transform:scale(.99)}button.secondary{background:#eaf2ea;color:#175b30}button.danger{background:#fff0ee;color:#a52923}button.tiny{min-height:34px;padding:6px 10px;font-size:13px}button:disabled{opacity:.5;cursor:not-allowed}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.meal{padding:13px 0;border-bottom:1px solid #edf1ed}.meal:last-child{border:0}.meal-name{font-weight:700;overflow-wrap:anywhere}.meal-info{color:#617266;font-size:13px;margin-top:4px}.error{color:#af2925;min-height:18px;font-size:14px}.date{max-width:185px}.pill{display:inline-block;background:#e9f4e9;color:#23653a;border-radius:50px;padding:5px 10px;font-size:12px;font-weight:700}.dayrow{display:grid;grid-template-columns:1fr auto;gap:12px;padding:12px 0;border-bottom:1px solid #eaf0e9}.dayrow:last-child{border:0}.hidden{display:none!important}.hint{font-size:13px;color:#617266}footer{text-align:center;font-size:12px;color:#708175;padding:15px}@media(max-width:420px){.card{padding:16px}.metric{font-size:34px}.two{grid-template-columns:1fr}.row.tight{align-items:flex-start}h1{font-size:29px}}
@@ -249,6 +252,7 @@ $('useFood').addEventListener('click',()=>{
  $('portionBox').classList.add('hidden');$('formTitle').scrollIntoView({behavior:'smooth',block:'start'});$('searchStatus').textContent='Food selected. Choose meal type and tap Add meal to save.';
 });
 render();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
 // Run once after each load; only missing values are eligible for filling.
 setTimeout(()=>{if(entries.some(e=>['carbs','fat','protein'].some(k=>e[k]===undefined)))autoFillOldMacros()},300);
 })();
