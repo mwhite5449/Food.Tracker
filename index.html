@@ -116,19 +116,19 @@ async function searchFoods(){
  if(searchController)searchController.abort();searchController=new AbortController();
  $('searchBtn').disabled=true;$('searchStatus').textContent='Searching foods…';$('searchResults').textContent='';$('portionBox').classList.add('hidden');selectedProduct=null;
  try{
- const params=new URLSearchParams({search_terms:q,page_size:'20',fields:'code,product_name,brands,quantity,serving_size,nutriments'});
+ const params=new URLSearchParams({search_terms:q,page_size:'30',countries_tags:'en:united-states',fields:'code,product_name,product_name_en,brands,quantity,serving_size,nutriments'});
  const response=await fetch(api+'?'+params.toString(),{signal:searchController.signal});
  if(sequence!==searchSequence)return;
  if(!response.ok)throw Error('Food database temporarily unavailable ('+response.status+').');
- const data=await response.json();if(sequence!==searchSequence)return;const products=(data.products||[]).map(p=>({...p,kcal:energyPer100(p)})).filter(p=>p.product_name&&p.kcal!==null).slice(0,15);
+ const data=await response.json();if(sequence!==searchSequence)return;const queryTerms=q.toLowerCase().split(/\\s+/).filter(Boolean);const products=(data.products||[]).map(p=>({...p,displayName:p.product_name_en||p.product_name,kcal:energyPer100(p)})).filter(p=>p.displayName&&p.kcal!==null&&/^[\\x20-\\x7E]+$/.test(p.displayName)&&queryTerms.every(t=>(p.displayName+' '+(p.brands||'')).toLowerCase().includes(t))).slice(0,12);
  const commonCount=showCommon(q);$('searchStatus').textContent=products.length||commonCount?'Choose a matching food or serving below.':'No foods with calorie data found. Try a different search or enter manually.';
  products.forEach(p=>{
  const item=document.createElement('div');item.className='search-result';
- const name=document.createElement('strong');name.textContent=p.product_name;item.appendChild(name);
+ const name=document.createElement('strong');name.textContent=p.displayName;item.appendChild(name);
  const desc=document.createElement('div');desc.className='hint';desc.textContent=[p.brands,p.quantity,Math.round(p.kcal)+' cal / 100 g',p.serving_size?'Serving: '+p.serving_size:''].filter(Boolean).join(' · ');item.appendChild(desc);
  const btn=document.createElement('button');btn.type='button';btn.className='secondary tiny';btn.textContent='Select food';btn.addEventListener('click',()=>{
- selectedProduct={name:p.product_name,brand:p.brands||'',kcal:p.kcal};
- $('selectedFood').textContent=p.product_name+' · '+Math.round(p.kcal)+' calories per 100 g';
+ selectedProduct={name:p.displayName,brand:p.brands||'',kcal:p.kcal};
+ $('selectedFood').textContent=p.displayName+' · '+Math.round(p.kcal)+' calories per 100 g';
  $('grams').value='100';$('portionBox').classList.remove('hidden');showPortion();$('portionBox').scrollIntoView({behavior:'smooth',block:'nearest'});
  });item.appendChild(btn);$('searchResults').appendChild(item);
  });
