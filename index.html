@@ -10,7 +10,7 @@
 <title>Food Tracker • Meals & Calories</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#182820;background:#f3f7f2;font-size:16px}*{box-sizing:border-box}body{margin:0}main{max-width:740px;margin:auto;padding:24px 16px 75px}h1{font-size:32px;letter-spacing:-1px;margin:0}h2{font-size:20px;margin:0 0 14px}p{line-height:1.5}.sub{color:#607266;margin:5px 0 20px}.card{background:#fff;border:1px solid #e2eae2;border-radius:18px;padding:20px;margin:16px 0;box-shadow:0 3px 16px #183e2010}.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.wrap{flex-wrap:wrap}.metric{font-size:40px;font-weight:800;letter-spacing:-1.5px}.muted{color:#637267}.small{font-size:13px}.progress{height:13px;background:#e5eee6;border-radius:20px;overflow:hidden;margin:16px 0 7px}.bar{height:100%;width:0;background:#16a34a;transition:width .2s}.bar.over{background:#e19b35}label{display:block;font-weight:650;margin:13px 0 6px}input,select,button{font:inherit;min-height:46px;border-radius:10px}input,select{width:100%;padding:10px 12px;border:1px solid #b9c9bd;background:white;color:#182820}input:focus,select:focus{outline:2px solid #6fb981;outline-offset:1px}button{padding:10px 16px;border:0;background:#166534;color:white;font-weight:700;cursor:pointer}button:active{transform:scale(.99)}button.secondary{background:#eaf2ea;color:#175b30}button.danger{background:#fff0ee;color:#a52923}button.tiny{min-height:34px;padding:6px 10px;font-size:13px}button:disabled{opacity:.5;cursor:not-allowed}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.meal{padding:13px 0;border-bottom:1px solid #edf1ed}.meal:last-child{border:0}.meal-name{font-weight:700;overflow-wrap:anywhere}.meal-info{color:#617266;font-size:13px;margin-top:4px}.error{color:#af2925;min-height:18px;font-size:14px}.date{max-width:185px}.pill{display:inline-block;background:#e9f4e9;color:#23653a;border-radius:50px;padding:5px 10px;font-size:12px;font-weight:700}.dayrow{display:grid;grid-template-columns:1fr auto;gap:12px;padding:12px 0;border-bottom:1px solid #eaf0e9}.dayrow:last-child{border:0}.hidden{display:none!important}.hint{font-size:13px;color:#617266}footer{text-align:center;font-size:12px;color:#708175;padding:15px}@media(max-width:420px){.card{padding:16px}.metric{font-size:34px}.two{grid-template-columns:1fr}.row.tight{align-items:flex-start}h1{font-size:29px}}
-</style>
+.search-results{max-height:320px;overflow:auto}.search-result{padding:12px 0;border-bottom:1px solid #eaf0e9}.search-result:last-child{border:0}.search-result button{margin-top:7px}.search-result strong{display:block}.search-status{min-height:18px} </style>
 </head>
 <body>
 <main>
@@ -20,6 +20,7 @@
 <div class="row" style="margin-top:18px"><div><div class="muted small">Calories eaten</div><div class="metric" id="total">0</div></div><div style="text-align:right"><label for="goal" class="muted small" style="margin:0 0 5px">Daily goal</label><input id="goal" type="number" inputmode="numeric" min="1" max="20000" style="width:110px;text-align:right"></div></div>
 <div class="progress" role="progressbar" aria-label="Daily calorie progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress"><div id="bar" class="bar"></div></div><div class="row"><span id="remaining" class="muted small"></span><span id="count" class="muted small"></span></div>
 </section>
+<section class="card"><h2>🔎 Search food database</h2><p class="hint">Search packaged foods using Open Food Facts. Select a result, enter the amount you ate, then add it as a meal. Internet required for search.</p><form id="searchForm"><label for="searchFood">Food or brand</label><div class="row"><input id="searchFood" type="search" placeholder="e.g. Quaker maple brown sugar oats" minlength="2" required><button type="submit" id="searchBtn">Search</button></div></form><p id="searchStatus" class="hint search-status" role="status"></p><div id="searchResults" class="search-results"></div><div id="portionBox" class="hidden"><h2 style="margin-top:15px">Serving amount</h2><p id="selectedFood" class="muted"></p><label for="grams">Amount eaten (grams or mL for liquids)</label><input id="grams" type="number" min="1" max="10000" step="1" inputmode="decimal" value="100"><p id="portionCalories" class="pill"></p><div class="row wrap"><button id="useFood" type="button">Use this food</button><button id="closeFood" class="secondary" type="button">Cancel</button></div></div></section>
 <section class="card"><h2 id="formTitle">Add a meal</h2>
 <form id="mealForm">
 <div class="two"><div><label for="category">Meal type</label><select id="category"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option></select></div><div><label for="calories">Calories</label><input id="calories" type="number" min="1" max="20000" step="1" inputmode="numeric" required placeholder="e.g. 450"></div></div>
@@ -31,7 +32,7 @@
 <section class="card"><div class="row"><h2 style="margin:0">Meals for selected day</h2><button class="secondary tiny" id="today">Today</button></div><div id="meals" aria-live="polite"></div></section>
 <section class="card"><h2>Recent days</h2><div id="history"></div></section>
 <section class="card"><h2>Back up your meals</h2><p class="hint">Your entries stay in this browser's storage, not in the public GitHub repository. Browser data removal, private browsing, or changing devices can erase them. Export backups regularly.</p><div class="row wrap"><button class="secondary" id="export" type="button">Download backup</button><button class="secondary" id="import" type="button">Import backup</button><input id="backup" class="hidden" type="file" accept=".json,application/json"></div><p id="backupStatus" class="hint" role="status"></p></section>
-<footer>Food Tracker • Calories are entered manually. Data is stored locally on this device.</footer>
+<footer>Food Tracker • Food data from Open Food Facts contributors. Verify labels and portions. Meals are stored locally.</footer>
 </main>
 <script>
 (function(){
@@ -40,7 +41,7 @@ const $=id=>document.getElementById(id);
 const STORE='food-tracker-entries-v1', GOAL='food-tracker-goal-v1';
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const safeDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(s);
-let entries=[],editing=null;
+let entries=[],editing=null,selectedProduct=null;
 try{const parsed=JSON.parse(localStorage.getItem(STORE)||'[]');if(Array.isArray(parsed))entries=parsed.filter(validEntry)}catch(e){}
 function validEntry(x){return x&&typeof x.id==='string'&&safeDate(x.date)&&typeof x.food==='string'&&x.food.length<=120&&Number.isInteger(x.calories)&&x.calories>0&&x.calories<=20000&&['Breakfast','Lunch','Dinner','Snack'].includes(x.category)&&typeof x.created==='number'&&(x.notes===undefined||(typeof x.notes==='string'&&x.notes.length<=240))}
 function save(){try{localStorage.setItem(STORE,JSON.stringify(entries));return true}catch(e){$('error').textContent='Could not save. Check browser storage or available space.';return false}}
@@ -73,6 +74,51 @@ $('goal').addEventListener('change',()=>{let n=Number($('goal').value);if(!Numbe
 $('export').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),goal:goal(),entries},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='food-tracker-backup-'+today()+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);$('backupStatus').textContent='Backup prepared. Save the downloaded file somewhere safe.'});
 $('import').addEventListener('click',()=>$('backup').click());
 $('backup').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>5e6)throw Error('Backup is too large.');const data=JSON.parse(await file.text());if(!data||!Array.isArray(data.entries)||!data.entries.every(validEntry))throw Error('Invalid food tracker backup.');if(!confirm('Import '+data.entries.length+' meals? Matching entries will be updated; other existing meals will remain.'))return;const old=entries;const byId=new Map(entries.map(x=>[x.id,x]));data.entries.forEach(x=>byId.set(x.id,x));entries=[...byId.values()];if(!save()){entries=old;return}if(Number.isInteger(data.goal)&&data.goal>0&&data.goal<=20000){$('goal').value=data.goal;try{localStorage.setItem(GOAL,String(data.goal))}catch(e){}}resetForm();render();$('backupStatus').textContent='Backup imported successfully.'}catch(err){$('backupStatus').textContent='Import failed: '+err.message}finally{e.target.value=''}});
+
+// Open Food Facts public search: results are approximate and depend on contributed labels.
+const api='https://world.openfoodfacts.org/cgi/search.pl';
+function energyPer100(p){
+ const n=p.nutriments||{};
+ const kcal=Number(n['energy-kcal_100g']);
+ if(Number.isFinite(kcal)&&kcal>=0&&kcal<2000)return kcal;
+ const kj=Number(n.energy_100g);
+ return Number.isFinite(kj)&&kj>=0&&kj<8400?kj/4.184:null;
+}
+function showPortion(){
+ const g=Number($('grams').value);
+ $('portionCalories').textContent=selectedProduct&&g>0&&g<=10000?Math.round(selectedProduct.kcal*g/100)+' calories':'Enter a valid amount';
+}
+$('searchForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const q=$('searchFood').value.trim();if(q.length<2)return;
+ $('searchBtn').disabled=true;$('searchStatus').textContent='Searching foods…';$('searchResults').textContent='';$('portionBox').classList.add('hidden');selectedProduct=null;
+ try{
+ const params=new URLSearchParams({search_terms:q,search_simple:'1',action:'process',json:'1',page_size:'20',fields:'code,product_name,brands,quantity,serving_size,nutriments'});
+ const response=await fetch(api+'?'+params.toString(),{headers:{Accept:'application/json'}});
+ if(!response.ok)throw Error('Food database temporarily unavailable ('+response.status+').');
+ const data=await response.json();const products=(data.products||[]).map(p=>({...p,kcal:energyPer100(p)})).filter(p=>p.product_name&&p.kcal!==null).slice(0,15);
+ $('searchStatus').textContent=products.length?products.length+' foods found. Choose a product.':'No foods with calorie data found. Try a different search or enter manually.';
+ products.forEach(p=>{
+ const item=document.createElement('div');item.className='search-result';
+ const name=document.createElement('strong');name.textContent=p.product_name;item.appendChild(name);
+ const desc=document.createElement('div');desc.className='hint';desc.textContent=[p.brands,p.quantity,Math.round(p.kcal)+' cal / 100 g',p.serving_size?'Serving: '+p.serving_size:''].filter(Boolean).join(' · ');item.appendChild(desc);
+ const btn=document.createElement('button');btn.type='button';btn.className='secondary tiny';btn.textContent='Select food';btn.addEventListener('click',()=>{
+ selectedProduct={name:p.product_name,brand:p.brands||'',kcal:p.kcal};
+ $('selectedFood').textContent=p.product_name+' · '+Math.round(p.kcal)+' calories per 100 g';
+ $('grams').value='100';$('portionBox').classList.remove('hidden');showPortion();$('portionBox').scrollIntoView({behavior:'smooth',block:'nearest'});
+ });item.appendChild(btn);$('searchResults').appendChild(item);
+ });
+ }catch(err){$('searchStatus').textContent='Search failed: '+err.message+' You can still add foods manually.'}
+ finally{$('searchBtn').disabled=false}
+});
+$('grams').addEventListener('input',showPortion);
+$('closeFood').addEventListener('click',()=>{$('portionBox').classList.add('hidden');selectedProduct=null});
+$('useFood').addEventListener('click',()=>{
+ if(!selectedProduct)return;const g=Number($('grams').value);if(!Number.isFinite(g)||g<=0||g>10000){$('searchStatus').textContent='Enter an amount between 1 and 10,000.';return}
+ const c=Math.round(selectedProduct.kcal*g/100);if(c<1||c>20000){$('searchStatus').textContent='This portion is outside the supported calorie range.';return}
+ resetForm();$('food').value=selectedProduct.name.slice(0,120);$('calories').value=c;$('notes').value=(g+' g'+(selectedProduct.brand?' · '+selectedProduct.brand:'')).slice(0,240);
+ $('portionBox').classList.add('hidden');$('formTitle').scrollIntoView({behavior:'smooth',block:'start'});$('searchStatus').textContent='Food selected. Choose meal type and tap Add meal to save.';
+});
 render();
 })();
 </script>
