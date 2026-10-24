@@ -270,7 +270,7 @@ $('upcForm').addEventListener('submit',async e=>{
    const p=data.product,kcal=energyPer100(p),macros=productMacros(p),grams=Number(String(p.serving_size||'').match(/([\d.]+)\s*g/i)?.[1])||100;
    if(p.product_name&&kcal!==null&&['carbs','fat','protein'].every(k=>Number.isFinite(macros[k]))){
     const factor=grams/100;upcFoodResult({name:p.product_name_en||p.product_name,serving:p.serving_size||'100 g',kcal:Math.round(kcal*factor),carbs:Math.round(macros.carbs*factor*10)/10,fat:Math.round(macros.fat*factor*10)/10,protein:Math.round(macros.protein*factor*10)/10},'Open Food Facts');
-    $('upcStatus').textContent='Found! Check product name and serving against your package.';return;
+    $('upcStatus').textContent='Found! Check product name and serving against your package.';$('upcBtn').disabled=false;return;
    }
   }
  }catch(err){}
