@@ -17,13 +17,14 @@
 </head>
 <body>
 <main>
-<header><div class="pill">Free • Private on this device</div><div style="display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-top:12px"><h1>🥗 Food Tracker</h1><span id="appVersion" style="font-size:13px;font-weight:700;color:#607266;white-space:nowrap" aria-label="App version">v1.2.0</span></div><p class="sub">Track meals, calories, carbohydrates, fat, protein, and daily progress.</p></header>
+<header><div class="pill">Free • Private on this device</div><div style="display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-top:12px"><h1>🥗 Food Tracker</h1><span id="appVersion" style="font-size:13px;font-weight:700;color:#607266;white-space:nowrap" aria-label="App version">v1.3.0</span></div><p class="sub">Track meals, calories, carbohydrates, fat, protein, and daily progress.</p></header>
 <section class="card">
 <div class="row wrap"><h2 style="margin:0">Daily summary</h2><div class="row"><button class="secondary tiny" id="prev" aria-label="Previous day">‹</button><input class="date" id="date" type="date" aria-label="Selected date"><button class="secondary tiny" id="next" aria-label="Next day">›</button></div></div>
 <div class="row" style="margin-top:18px"><div><div class="muted small">Calories eaten</div><div class="metric" id="total">0</div></div><div style="text-align:right"><label for="goal" class="muted small" style="margin:0 0 5px">Daily goal</label><input id="goal" type="number" inputmode="numeric" min="1" max="20000" style="width:110px;text-align:right"></div></div>
 <div class="macros"><div class="macro"><strong id="carbsTotal">0 g</strong><span>Carbohydrates</span></div><div class="macro"><strong id="fatTotal">0 g</strong><span>Fat</span></div><div class="macro"><strong id="proteinTotal">0 g</strong><span>Protein</span></div></div><div class="row wrap" style="margin-top:12px"><button id="backfill" type="button" class="secondary tiny">Recheck missing macros</button><span id="backfillStatus" class="hint" role="status"></span></div><div class="progress" role="progressbar" aria-label="Daily calorie progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress"><div id="bar" class="bar"></div></div><div class="row"><span id="remaining" class="muted small"></span><span id="count" class="muted small"></span></div>
 </section>
 <section class="card"><h2>🔎 Search food database</h2><p class="hint">Type a food or brand, then tap Search to find products online. Common foods appear as you type. Select a result, enter the amount you ate, then add it as a meal.</p><form id="searchForm"><label for="searchFood">Food or brand</label><div class="row"><input id="searchFood" type="search" placeholder="Start typing, e.g. Quaker oatmeal" minlength="2" autocomplete="off" required><button type="submit" id="searchBtn">Search</button></div></form><p id="searchStatus" class="hint search-status" role="status"></p><div id="searchResults" class="search-results"></div><p class="hint">Common foods are available even if the online database is unavailable.</p><div id="portionBox" class="hidden"><h2 style="margin-top:15px">Serving amount</h2><p id="selectedFood" class="muted"></p><label for="grams">Amount eaten (grams or mL for liquids)</label><input id="grams" type="number" min="1" max="10000" step="1" inputmode="decimal" value="100"><p id="portionCalories" class="pill"></p><div class="row wrap"><button id="useFood" type="button">Use this food</button><button id="closeFood" class="secondary" type="button">Cancel</button></div></div></section>
+<section class="card"><h2>🔢 UPC / Barcode lookup</h2><p class="hint">Paste the UPC or GTIN from USDA FoodData Central or your food package. We'll try Open Food Facts, then USDA's limited public lookup.</p><form id="upcForm"><label for="upcInput">UPC / barcode (8–14 digits)</label><div class="row"><input id="upcInput" inputmode="numeric" pattern="[0-9]{8,14}" maxlength="14" placeholder="e.g. 012345678905" required><button type="submit" id="upcBtn">Look up</button></div></form><p id="upcStatus" class="hint" role="status"></p><div id="upcResults" class="search-results"></div></section>
 <section class="card"><h2>📚 My food library</h2><p class="hint">Save foods you use often. Your saved foods appear automatically when you search, even offline. The library stays on this device.</p><div id="libraryItems"></div><details><summary style="cursor:pointer;font-weight:700;margin:12px 0">Add a food from its nutrition label</summary><form id="libraryForm"><label for="libName">Product name</label><input id="libName" required maxlength="120" placeholder="e.g. Bush's Original Baked Beans"><label for="libServing">Serving description</label><input id="libServing" required maxlength="80" placeholder="e.g. 1/2 cup (130 g)"><div class="two"><div><label for="libCalories">Calories per serving</label><input id="libCalories" required type="number" min="0" max="20000" step="1"></div><div><label for="libCarbs">Carbs (g)</label><input id="libCarbs" required type="number" min="0" max="2000" step="any"></div><div><label for="libFat">Fat (g)</label><input id="libFat" required type="number" min="0" max="2000" step="any"></div><div><label for="libProtein">Protein (g)</label><input id="libProtein" required type="number" min="0" max="2000" step="any"></div></div><button type="submit">Save to my foods</button></form></details><p id="libraryStatus" class="hint" role="status"></p><p class="hint">Can't find the exact product? <a href="https://fdc.nal.usda.gov/food-search" target="_blank" rel="noopener noreferrer">Look it up in USDA FoodData Central</a>, then save its label values here.</p></section>
 <section class="card"><h2 id="formTitle">Add a meal</h2>
 <form id="mealForm">
@@ -239,6 +240,50 @@ function energyPer100(p){
  return Number.isFinite(kj)&&kj>=0&&kj<8400?kj/4.184:null;
 }
 function productMacros(p){const n=p.nutriments||{};const m={};for(const [k,key] of [['carbs','carbohydrates_100g'],['fat','fat_100g'],['protein','proteins_100g']]){const v=n[key];if(v!==undefined&&v!==null&&v!==''&&Number.isFinite(Number(v))&&Number(v)>=0&&Number(v)<=100)m[k]=Number(v)}return m}
+function upcFoodResult(food,source){
+ const root=$('upcResults');root.textContent='';
+ const card=document.createElement('div');card.className='search-result';
+ const heading=document.createElement('strong');heading.textContent=food.name;card.appendChild(heading);
+ const details=document.createElement('p');details.className='hint';details.textContent=source+' · '+food.kcal+' cal · '+food.carbs+' g carbs · '+food.fat+' g fat · '+food.protein+' g protein per '+food.serving;card.appendChild(details);
+ const use=document.createElement('button');use.type='button';use.className='secondary tiny';use.textContent='Use / choose amount';use.addEventListener('click',()=>{commonResult({name:food.name,kcal:food.kcal,amount:food.serving,macros:{carbs:food.carbs,fat:food.fat,protein:food.protein}});const buttons=$('searchResults').querySelectorAll('button');if(buttons.length)buttons[buttons.length-1].click()});card.appendChild(use);
+ const save=document.createElement('button');save.type='button';save.className='secondary tiny';save.style.marginLeft='8px';save.textContent='Save to my foods';save.addEventListener('click',()=>{library=library.filter(f=>!(f.name.toLowerCase()===food.name.toLowerCase()&&f.serving===food.serving));library.unshift(food);if(saveLibrary()){renderLibrary();$('upcStatus').textContent='Saved to My food library.'}});card.appendChild(save);root.appendChild(card);
+}
+function usdaBarcodeFood(p,code){
+ if(!p||!p.description)return null;
+ const id=String(p.gtinUpc||'').replace(/^0+/,'');if(id!==code.replace(/^0+/,''))return null;
+ const n=p.foodNutrients||[];
+ const get=(ids)=>{const x=n.find(v=>ids.includes(Number(v.nutrientId||v.nutrient?.id)));return x?Number(x.value??x.amount):NaN};
+ const grams=Number(p.servingSize),unit=String(p.servingSizeUnit||'').toLowerCase();
+ if(!Number.isFinite(grams)||grams<=0||grams>1000||unit!=='g')return null;
+ const kcal=get([1008]),carbs=get([1005]),fat=get([1004]),protein=get([1003]);
+ if(![kcal,carbs,fat,protein].every(v=>Number.isFinite(v)&&v>=0))return null;
+ const scale=grams/100;
+ return {name:p.description,serving:(p.householdServingFullText||grams+' g')+' ('+grams+' g)',kcal:Math.round(kcal*scale),carbs:Math.round(carbs*scale*10)/10,fat:Math.round(fat*scale*10)/10,protein:Math.round(protein*scale*10)/10};
+}
+$('upcForm').addEventListener('submit',async e=>{
+ e.preventDefault();const code=$('upcInput').value.trim();if(!/^\d{8,14}$/.test(code))return;
+ $('upcResults').textContent='';$('upcBtn').disabled=true;$('upcStatus').textContent='Checking Open Food Facts…';
+ try{
+  const url='https://world.openfoodfacts.org/api/v2/product/'+encodeURIComponent(code)+'.json?fields=code,product_name,product_name_en,brands,serving_size,nutriments';
+  const r=await fetch(url);if(!r.ok)throw Error('Open Food Facts request failed');const data=await r.json();
+  if(data.status===1&&data.product){
+   const p=data.product,kcal=energyPer100(p),macros=productMacros(p),grams=Number(String(p.serving_size||'').match(/([\d.]+)\s*g/i)?.[1])||100;
+   if(p.product_name&&kcal!==null&&['carbs','fat','protein'].every(k=>Number.isFinite(macros[k]))){
+    const factor=grams/100;upcFoodResult({name:p.product_name_en||p.product_name,serving:p.serving_size||'100 g',kcal:Math.round(kcal*factor),carbs:Math.round(macros.carbs*factor*10)/10,fat:Math.round(macros.fat*factor*10)/10,protein:Math.round(macros.protein*factor*10)/10},'Open Food Facts');
+    $('upcStatus').textContent='Found! Check product name and serving against your package.';return;
+   }
+  }
+ }catch(err){}
+ $('upcStatus').textContent='Checking USDA FoodData Central…';
+ try{
+  const url='https://api.nal.usda.gov/fdc/v1/foods/search?api_key=DEMO_KEY&query='+encodeURIComponent(code)+'&dataType=Branded&pageSize=20';
+  const r=await fetch(url);if(!r.ok)throw Error('USDA unavailable');const data=await r.json();
+  const foods=(data.foods||[]).map(p=>usdaBarcodeFood(p,code)).filter(Boolean);
+  if(foods.length){upcFoodResult(foods[0],'USDA FoodData Central');$('upcStatus').textContent='Found in USDA. Confirm the label and serving size.';return}
+  $('upcStatus').textContent='No complete barcode match found. USDA public access may be rate-limited. You can enter the label in My food library below.';
+ }catch(err){$('upcStatus').textContent='USDA lookup unavailable or public demo limit reached. Enter the nutrition label in My food library below.'}
+ finally{$('upcBtn').disabled=false}
+});
 function showPortion(){
  const g=Number($('grams').value);
  $('portionCalories').textContent=selectedProduct&&g>0&&g<=10000?Math.round(selectedProduct.kcal*g/100)+' calories':'Enter a valid amount';
