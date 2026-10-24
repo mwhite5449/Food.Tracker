@@ -118,6 +118,14 @@ async function autoFillOldMacros(){
  for(const e of entries){
   const missing=['carbs','fat','protein'].filter(k=>e[k]===undefined);
   if(!missing.length)continue;
+  // Older entries may have been typed manually with a different Quaker name.
+  const normalized=e.food.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  const quakerMaple= /\bquaker\b/.test(normalized)&&/\b(oat|oats|oatmeal)\b/.test(normalized)&&/\bmaple\b/.test(normalized)&&/\bbrown\b/.test(normalized)&&/\bsugar\b/.test(normalized);
+  if(quakerMaple&&e.calories===160){
+   const reference={carbs:33,fat:2,protein:4};
+   for(const k of missing)e[k]=reference[k];
+   updated++;continue;
+  }
   const match=commonFoods.find(f=>f.name.toLowerCase()===e.food.toLowerCase().trim());
   const key=match&&Object.keys(knownMacros).find(k=>match.name.startsWith(k));
   if(match&&key&&Math.abs(e.calories-match.kcal)<=Math.max(2,match.kcal*.05)){
