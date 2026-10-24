@@ -18,7 +18,7 @@
 <section class="card">
 <div class="row wrap"><h2 style="margin:0">Daily summary</h2><div class="row"><button class="secondary tiny" id="prev" aria-label="Previous day">‹</button><input class="date" id="date" type="date" aria-label="Selected date"><button class="secondary tiny" id="next" aria-label="Next day">›</button></div></div>
 <div class="row" style="margin-top:18px"><div><div class="muted small">Calories eaten</div><div class="metric" id="total">0</div></div><div style="text-align:right"><label for="goal" class="muted small" style="margin:0 0 5px">Daily goal</label><input id="goal" type="number" inputmode="numeric" min="1" max="20000" style="width:110px;text-align:right"></div></div>
-<div class="macros"><div class="macro"><strong id="carbsTotal">0 g</strong><span>Carbohydrates</span></div><div class="macro"><strong id="fatTotal">0 g</strong><span>Fat</span></div><div class="macro"><strong id="proteinTotal">0 g</strong><span>Protein</span></div></div><div class="progress" role="progressbar" aria-label="Daily calorie progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress"><div id="bar" class="bar"></div></div><div class="row"><span id="remaining" class="muted small"></span><span id="count" class="muted small"></span></div>
+<div class="macros"><div class="macro"><strong id="carbsTotal">0 g</strong><span>Carbohydrates</span></div><div class="macro"><strong id="fatTotal">0 g</strong><span>Fat</span></div><div class="macro"><strong id="proteinTotal">0 g</strong><span>Protein</span></div></div><div class="row wrap" style="margin-top:12px"><button id="backfill" type="button" class="secondary tiny">Fill missing macros from food data</button><span id="backfillStatus" class="hint" role="status"></span></div><div class="progress" role="progressbar" aria-label="Daily calorie progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress"><div id="bar" class="bar"></div></div><div class="row"><span id="remaining" class="muted small"></span><span id="count" class="muted small"></span></div>
 </section>
 <section class="card"><h2>🔎 Search food database</h2><p class="hint">Start typing a food or brand to see suggestions automatically. Select a result, enter the amount you ate, then add it as a meal. Internet required for search.</p><form id="searchForm"><label for="searchFood">Food or brand</label><div class="row"><input id="searchFood" type="search" placeholder="Start typing, e.g. Quaker oatmeal" minlength="2" autocomplete="off" required><button type="submit" id="searchBtn">Search</button></div></form><p id="searchStatus" class="hint search-status" role="status"></p><div id="searchResults" class="search-results"></div><p class="hint">Common foods are available even if the online database is unavailable.</p><div id="portionBox" class="hidden"><h2 style="margin-top:15px">Serving amount</h2><p id="selectedFood" class="muted"></p><label for="grams">Amount eaten (grams or mL for liquids)</label><input id="grams" type="number" min="1" max="10000" step="1" inputmode="decimal" value="100"><p id="portionCalories" class="pill"></p><div class="row wrap"><button id="useFood" type="button">Use this food</button><button id="closeFood" class="secondary" type="button">Cancel</button></div></div></section>
 <section class="card"><h2 id="formTitle">Add a meal</h2>
@@ -111,6 +111,27 @@ const knownMacros={
 'Egg':{carbs:0.4,fat:4.8,protein:6.3}
 };
 function fillMacros(m){for(const k of ['carbs','fat','protein'])$(k).value=m&&m[k]!==undefined?Math.round(m[k]*10)/10:''}
+function fillOldMacros(){
+ let updated=0,skipped=0;const before=entries.map(e=>({...e}));
+ for(const e of entries){
+  const missing=['carbs','fat','protein'].filter(k=>e[k]===undefined);
+  if(!missing.length)continue;
+  const name=e.food.toLowerCase().trim();
+  const match=commonFoods.find(f=>f.name.toLowerCase()===name);
+  if(!match){skipped++;continue}
+  const key=Object.keys(knownMacros).find(k=>match.name.startsWith(k));
+  if(!key){skipped++;continue}
+  const macros=knownMacros[key];
+  // Only use a built-in serving when the logged calories are consistent with that serving.
+  if(Math.abs(e.calories-match.kcal)>Math.max(2,match.kcal*.05)){skipped++;continue}
+  for(const k of missing)if(macros[k]!==undefined)e[k]=macros[k];
+  updated++;
+ }
+ if(updated&&!save()){entries=before;return}
+ render();
+ $('backfillStatus').textContent=updated+' meal'+(updated===1?'':'s')+' updated; '+skipped+' need manual review. Existing calories were not changed.';
+}
+$('backfill').addEventListener('click',fillOldMacros);
 function commonMatches(q){const terms=q.toLowerCase().trim().split(/\s+/);return commonFoods.filter(f=>terms.every(t=>(f.name+' '+f.terms).toLowerCase().includes(t)))}
 function commonResult(f){
  const item=document.createElement('div');item.className='search-result';
