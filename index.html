@@ -17,7 +17,7 @@
 </head>
 <body>
 <main>
-<header><div class="pill">Free • Private on this device</div><div style="display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-top:12px"><h1>🥗 Food Tracker</h1><span id="appVersion" style="font-size:13px;font-weight:700;color:#607266;white-space:nowrap" aria-label="App version">v1.0.0</span></div><p class="sub">Track meals, calories, carbohydrates, fat, protein, and daily progress.</p></header>
+<header><div class="pill">Free • Private on this device</div><div style="display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-top:12px"><h1>🥗 Food Tracker</h1><span id="appVersion" style="font-size:13px;font-weight:700;color:#607266;white-space:nowrap" aria-label="App version">v1.1.0</span></div><p class="sub">Track meals, calories, carbohydrates, fat, protein, and daily progress.</p></header>
 <section class="card">
 <div class="row wrap"><h2 style="margin:0">Daily summary</h2><div class="row"><button class="secondary tiny" id="prev" aria-label="Previous day">‹</button><input class="date" id="date" type="date" aria-label="Selected date"><button class="secondary tiny" id="next" aria-label="Next day">›</button></div></div>
 <div class="row" style="margin-top:18px"><div><div class="muted small">Calories eaten</div><div class="metric" id="total">0</div></div><div style="text-align:right"><label for="goal" class="muted small" style="margin:0 0 5px">Daily goal</label><input id="goal" type="number" inputmode="numeric" min="1" max="20000" style="width:110px;text-align:right"></div></div>
@@ -204,7 +204,17 @@ function commonResult(f){
  const name=document.createElement('strong');name.textContent=f.name;item.appendChild(name);
  const desc=document.createElement('div');desc.className='hint';desc.textContent=f.kcal+' calories · '+f.amount+' · Approximate reference value';item.appendChild(desc);
  const btn=document.createElement('button');btn.type='button';btn.className='secondary tiny';btn.textContent='Use this serving';
- btn.addEventListener('click',()=>{resetForm();$('food').value=f.name.slice(0,120);$('calories').value=f.kcal;$('notes').value=f.amount;const key=Object.keys(knownMacros).find(k=>f.name.startsWith(k));fillMacros(key?knownMacros[key]:null);$('formTitle').scrollIntoView({behavior:'smooth',block:'start'});$('searchStatus').textContent='Serving selected. Choose meal type and tap Add meal to save.'});
+ btn.addEventListener('click',()=>{
+  const old=$('portionBox').querySelector('#servingQuantity');if(old)old.remove();
+  const row=document.createElement('div');row.id='servingQuantity';row.innerHTML='<label for="servingCount">Number of servings (0.5 = half)</label><input id="servingCount" type="number" min="0.01" max="100" step="any" inputmode="decimal" value="1"><p id="servingPreview" class="pill"></p><div class="row wrap"><button type="button" id="applyServing">Use this amount</button><button type="button" class="secondary" id="cancelServing">Cancel</button></div>';
+  const portion=$('portionBox');portion.classList.remove('hidden');portion.querySelector('h2').textContent='Serving quantity';$('selectedFood').textContent=f.name+' · '+f.kcal+' calories per '+f.amount;$('grams').parentElement.querySelector('label').style.display='none';$('grams').style.display='none';$('portionCalories').style.display='none';$('useFood').style.display='none';$('closeFood').style.display='none';portion.appendChild(row);
+  const key=Object.keys(knownMacros).find(k=>f.name.startsWith(k));const macros=key?knownMacros[key]:null;
+  const preview=()=>{const n=Number($('servingCount').value);$('servingPreview').textContent=n>0&&n<=100?Math.round(f.kcal*n)+' calories · '+n+' serving(s)':'Enter a valid serving quantity'};
+  $('servingCount').addEventListener('input',preview);preview();
+  $('applyServing').addEventListener('click',()=>{const n=Number($('servingCount').value);if(!Number.isFinite(n)||n<=0||n>100)return;resetForm();$('food').value=f.name.slice(0,120);$('calories').value=Math.round(f.kcal*n);$('notes').value=(n+' × '+f.amount).slice(0,240);fillMacros(macros?Object.fromEntries(Object.entries(macros).map(([k,v])=>[k,Math.round(v*n*10)/10])):null);portion.classList.add('hidden');$('formTitle').scrollIntoView({behavior:'smooth',block:'start'});$('searchStatus').textContent='Amount selected. Choose meal type and tap Add meal.'});
+  $('cancelServing').addEventListener('click',()=>portion.classList.add('hidden'));
+  portion.scrollIntoView({behavior:'smooth',block:'nearest'});
+ });
  item.appendChild(btn);$('searchResults').appendChild(item);
 }
 function showCommon(q){$('searchResults').textContent='';const matches=commonMatches(q);matches.forEach(commonResult);return matches.length}
@@ -223,6 +233,7 @@ function showPortion(){
 }
 async function searchFoods(){
  const q=$('searchFood').value.trim();if(q.length<2){$('searchResults').textContent='';$('searchStatus').textContent='Type at least 2 characters to search.';return}
+ const oldServing=$('servingQuantity');if(oldServing)oldServing.remove();$('grams').parentElement.querySelector('label').style.display='';$('grams').style.display='';$('portionCalories').style.display='';$('useFood').style.display='';$('closeFood').style.display='';$('portionBox').querySelector('h2').textContent='Serving amount';
  const sequence=++searchSequence;
  if(searchController)searchController.abort();searchController=new AbortController();
  $('searchBtn').disabled=true;$('searchStatus').textContent='Searching online; common foods are shown below…';showCommon(q);$('portionBox').classList.add('hidden');selectedProduct=null;
