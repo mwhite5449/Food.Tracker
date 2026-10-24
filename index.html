@@ -10,21 +10,21 @@
 <title>Food Tracker • Meals & Calories</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#182820;background:#f3f7f2;font-size:16px}*{box-sizing:border-box}body{margin:0}main{max-width:740px;margin:auto;padding:24px 16px 75px}h1{font-size:32px;letter-spacing:-1px;margin:0}h2{font-size:20px;margin:0 0 14px}p{line-height:1.5}.sub{color:#607266;margin:5px 0 20px}.card{background:#fff;border:1px solid #e2eae2;border-radius:18px;padding:20px;margin:16px 0;box-shadow:0 3px 16px #183e2010}.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.wrap{flex-wrap:wrap}.metric{font-size:40px;font-weight:800;letter-spacing:-1.5px}.muted{color:#637267}.small{font-size:13px}.progress{height:13px;background:#e5eee6;border-radius:20px;overflow:hidden;margin:16px 0 7px}.bar{height:100%;width:0;background:#16a34a;transition:width .2s}.bar.over{background:#e19b35}label{display:block;font-weight:650;margin:13px 0 6px}input,select,button{font:inherit;min-height:46px;border-radius:10px}input,select{width:100%;padding:10px 12px;border:1px solid #b9c9bd;background:white;color:#182820}input:focus,select:focus{outline:2px solid #6fb981;outline-offset:1px}button{padding:10px 16px;border:0;background:#166534;color:white;font-weight:700;cursor:pointer}button:active{transform:scale(.99)}button.secondary{background:#eaf2ea;color:#175b30}button.danger{background:#fff0ee;color:#a52923}button.tiny{min-height:34px;padding:6px 10px;font-size:13px}button:disabled{opacity:.5;cursor:not-allowed}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.meal{padding:13px 0;border-bottom:1px solid #edf1ed}.meal:last-child{border:0}.meal-name{font-weight:700;overflow-wrap:anywhere}.meal-info{color:#617266;font-size:13px;margin-top:4px}.error{color:#af2925;min-height:18px;font-size:14px}.date{max-width:185px}.pill{display:inline-block;background:#e9f4e9;color:#23653a;border-radius:50px;padding:5px 10px;font-size:12px;font-weight:700}.dayrow{display:grid;grid-template-columns:1fr auto;gap:12px;padding:12px 0;border-bottom:1px solid #eaf0e9}.dayrow:last-child{border:0}.hidden{display:none!important}.hint{font-size:13px;color:#617266}footer{text-align:center;font-size:12px;color:#708175;padding:15px}@media(max-width:420px){.card{padding:16px}.metric{font-size:34px}.two{grid-template-columns:1fr}.row.tight{align-items:flex-start}h1{font-size:29px}}
-.search-results{max-height:320px;overflow:auto}.search-result{padding:12px 0;border-bottom:1px solid #eaf0e9}.search-result:last-child{border:0}.search-result button{margin-top:7px}.search-result strong{display:block}.search-status{min-height:18px} </style>
+.search-results{max-height:320px;overflow:auto}.search-result{padding:12px 0;border-bottom:1px solid #eaf0e9}.search-result:last-child{border:0}.search-result button{margin-top:7px}.search-result strong{display:block}.search-status{min-height:18px} .macros{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:14px}.macro{background:#f1f7f0;border-radius:12px;padding:12px 8px;text-align:center}.macro strong{display:block;font-size:22px}.macro span{font-size:12px;color:#52675a}.macro-inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.macro-inputs label{font-size:13px}.macro-inputs input{min-width:0}@media(max-width:380px){.macros{gap:5px}.macro strong{font-size:18px}} </style>
 </head>
 <body>
 <main>
-<header><div class="pill">Free • Private on this device</div><h1 style="margin-top:12px">🥗 Food Tracker</h1><p class="sub">Track meals, calories, and daily progress.</p></header>
+<header><div class="pill">Free • Private on this device</div><h1 style="margin-top:12px">🥗 Food Tracker</h1><p class="sub">Track meals, calories, carbohydrates, fat, protein, and daily progress.</p></header>
 <section class="card">
 <div class="row wrap"><h2 style="margin:0">Daily summary</h2><div class="row"><button class="secondary tiny" id="prev" aria-label="Previous day">‹</button><input class="date" id="date" type="date" aria-label="Selected date"><button class="secondary tiny" id="next" aria-label="Next day">›</button></div></div>
 <div class="row" style="margin-top:18px"><div><div class="muted small">Calories eaten</div><div class="metric" id="total">0</div></div><div style="text-align:right"><label for="goal" class="muted small" style="margin:0 0 5px">Daily goal</label><input id="goal" type="number" inputmode="numeric" min="1" max="20000" style="width:110px;text-align:right"></div></div>
-<div class="progress" role="progressbar" aria-label="Daily calorie progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress"><div id="bar" class="bar"></div></div><div class="row"><span id="remaining" class="muted small"></span><span id="count" class="muted small"></span></div>
+<div class="macros"><div class="macro"><strong id="carbsTotal">0 g</strong><span>Carbohydrates</span></div><div class="macro"><strong id="fatTotal">0 g</strong><span>Fat</span></div><div class="macro"><strong id="proteinTotal">0 g</strong><span>Protein</span></div></div><div class="progress" role="progressbar" aria-label="Daily calorie progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress"><div id="bar" class="bar"></div></div><div class="row"><span id="remaining" class="muted small"></span><span id="count" class="muted small"></span></div>
 </section>
 <section class="card"><h2>🔎 Search food database</h2><p class="hint">Start typing a food or brand to see suggestions automatically. Select a result, enter the amount you ate, then add it as a meal. Internet required for search.</p><form id="searchForm"><label for="searchFood">Food or brand</label><div class="row"><input id="searchFood" type="search" placeholder="Start typing, e.g. Quaker oatmeal" minlength="2" autocomplete="off" required><button type="submit" id="searchBtn">Search</button></div></form><p id="searchStatus" class="hint search-status" role="status"></p><div id="searchResults" class="search-results"></div><p class="hint">Common foods are available even if the online database is unavailable.</p><div id="portionBox" class="hidden"><h2 style="margin-top:15px">Serving amount</h2><p id="selectedFood" class="muted"></p><label for="grams">Amount eaten (grams or mL for liquids)</label><input id="grams" type="number" min="1" max="10000" step="1" inputmode="decimal" value="100"><p id="portionCalories" class="pill"></p><div class="row wrap"><button id="useFood" type="button">Use this food</button><button id="closeFood" class="secondary" type="button">Cancel</button></div></div></section>
 <section class="card"><h2 id="formTitle">Add a meal</h2>
 <form id="mealForm">
 <div class="two"><div><label for="category">Meal type</label><select id="category"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option></select></div><div><label for="calories">Calories</label><input id="calories" type="number" min="1" max="20000" step="1" inputmode="numeric" required placeholder="e.g. 450"></div></div>
-<label for="food">Food or meal name</label><input id="food" maxlength="120" required placeholder="e.g. Turkey sandwich" autocomplete="off">
+<div class="macro-inputs"><div><label for="carbs">Carbs (g)</label><input id="carbs" type="number" min="0" max="2000" step="0.1" inputmode="decimal" placeholder="Optional"></div><div><label for="fat">Fat (g)</label><input id="fat" type="number" min="0" max="2000" step="0.1" inputmode="decimal" placeholder="Optional"></div><div><label for="protein">Protein (g)</label><input id="protein" type="number" min="0" max="2000" step="0.1" inputmode="decimal" placeholder="Optional"></div></div><label for="food">Food or meal name</label><input id="food" maxlength="120" required placeholder="e.g. Turkey sandwich" autocomplete="off">
 <label for="notes">Notes (optional)</label><input id="notes" maxlength="240" placeholder="e.g. with chips" autocomplete="off">
 <p id="error" class="error" role="alert"></p>
 <div class="row"><button type="submit" id="submit" style="flex:1">+ Add meal</button><button type="button" id="cancel" class="secondary hidden">Cancel</button></div>
@@ -43,7 +43,7 @@ const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth
 const safeDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(s);
 let entries=[],editing=null,selectedProduct=null;
 try{const parsed=JSON.parse(localStorage.getItem(STORE)||'[]');if(Array.isArray(parsed))entries=parsed.filter(validEntry)}catch(e){}
-function validEntry(x){return x&&typeof x.id==='string'&&safeDate(x.date)&&typeof x.food==='string'&&x.food.length<=120&&Number.isInteger(x.calories)&&x.calories>0&&x.calories<=20000&&['Breakfast','Lunch','Dinner','Snack'].includes(x.category)&&typeof x.created==='number'&&(x.notes===undefined||(typeof x.notes==='string'&&x.notes.length<=240))}
+function validEntry(x){return x&&typeof x.id==='string'&&safeDate(x.date)&&typeof x.food==='string'&&x.food.length<=120&&Number.isInteger(x.calories)&&x.calories>0&&x.calories<=20000&&['Breakfast','Lunch','Dinner','Snack'].includes(x.category)&&typeof x.created==='number'&&['carbs','fat','protein'].every(k=>x[k]===undefined||(typeof x[k]==='number'&&Number.isFinite(x[k])&&x[k]>=0&&x[k]<=2000))&&(x.notes===undefined||(typeof x.notes==='string'&&x.notes.length<=240))}
 function save(){try{localStorage.setItem(STORE,JSON.stringify(entries));return true}catch(e){$('error').textContent='Could not save. Check browser storage or available space.';return false}}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 $('date').value=today();const savedGoal=Number(localStorage.getItem(GOAL));$('goal').value=Number.isInteger(savedGoal)&&savedGoal>0&&savedGoal<=20000?savedGoal:2000;
@@ -51,20 +51,24 @@ function goal(){return Number($('goal').value)||2000}
 function render(){
 const date=$('date').value,items=entries.filter(e=>e.date===date).sort((a,b)=>a.created-b.created);
 const total=items.reduce((sum,e)=>sum+e.calories,0),g=goal(),pct=Math.round(total/g*100);
+const sumMacro=k=>Math.round(items.reduce((sum,e)=>sum+(Number(e[k])||0),0)*10)/10;
+const fmt=n=>n.toLocaleString(undefined,{maximumFractionDigits:1})+' g';
+$('carbsTotal').textContent=fmt(sumMacro('carbs'));$('fatTotal').textContent=fmt(sumMacro('fat'));$('proteinTotal').textContent=fmt(sumMacro('protein'));
 $('total').textContent=total.toLocaleString();$('bar').style.width=Math.min(100,pct)+'%';$('bar').classList.toggle('over',total>g);$('progress').setAttribute('aria-valuenow',Math.min(100,pct));
 $('remaining').textContent=total<=g?(g-total).toLocaleString()+' calories remaining':(total-g).toLocaleString()+' calories over goal';$('count').textContent=items.length+' meal'+(items.length===1?'':'s');
-$('meals').innerHTML=items.length?items.map(e=>'<div class="meal row tight"><div><div class="meal-name">'+escapeHtml(e.food)+'</div><div class="meal-info">'+escapeHtml(e.category)+' · '+e.calories.toLocaleString()+' cal'+(e.notes?' · '+escapeHtml(e.notes):'')+'</div></div><div class="row" style="gap:5px"><button type="button" class="secondary tiny" data-edit="'+escapeHtml(e.id)+'">Edit</button><button type="button" class="danger tiny" data-delete="'+escapeHtml(e.id)+'">Delete</button></div></div>').join(''):'<p class="muted">No meals logged for this day. Add one above!</p>';
+$('meals').innerHTML=items.length?items.map(e=>'<div class="meal row tight"><div><div class="meal-name">'+escapeHtml(e.food)+'</div><div class="meal-info">'+escapeHtml(e.category)+' · '+e.calories.toLocaleString()+' cal'+(['carbs','fat','protein'].some(k=>e[k]!==undefined)?' · Carbs '+(e.carbs===undefined?'—':fmt(e.carbs))+' · Fat '+(e.fat===undefined?'—':fmt(e.fat))+' · Protein '+(e.protein===undefined?'—':fmt(e.protein)):' · Macros not recorded')+(e.notes?' · '+escapeHtml(e.notes):'')+'</div></div><div class="row" style="gap:5px"><button type="button" class="secondary tiny" data-edit="'+escapeHtml(e.id)+'">Edit</button><button type="button" class="danger tiny" data-delete="'+escapeHtml(e.id)+'">Delete</button></div></div>').join(''):'<p class="muted">No meals logged for this day. Add one above!</p>';
 const dates=[...new Set(entries.map(e=>e.date).filter(d=>d!==date))].sort().reverse().slice(0,10);
 $('history').innerHTML=dates.length?dates.map(d=>{const a=entries.filter(e=>e.date===d);return '<div class="dayrow"><div><strong>'+escapeHtml(d)+'</strong><div class="muted small">'+a.length+' meal'+(a.length===1?'':'s')+'</div></div><div style="text-align:right"><strong>'+a.reduce((s,e)=>s+e.calories,0).toLocaleString()+' cal</strong><div><button type="button" class="secondary tiny" data-day="'+escapeHtml(d)+'">View</button></div></div></div>'}).join(''):'<p class="muted">Your logged days will appear here.</p>';
 }
 function resetForm(){editing=null;$('mealForm').reset();$('formTitle').textContent='Add a meal';$('submit').textContent='+ Add meal';$('cancel').classList.add('hidden');$('error').textContent=''}
 $('mealForm').addEventListener('submit',e=>{e.preventDefault();$('error').textContent='';const food=$('food').value.trim(),notes=$('notes').value.trim(),cal=Number($('calories').value),category=$('category').value;
+const macros={};for(const k of ['carbs','fat','protein']){const raw=$(k).value.trim();if(raw!==''){const n=Number(raw);if(!Number.isFinite(n)||n<0||n>2000){$('error').textContent='Macros must be between 0 and 2,000 grams.';return}macros[k]=Math.round(n*10)/10}}
 if(!food||!Number.isInteger(cal)||cal<1||cal>20000){$('error').textContent='Enter a meal name and whole-number calories from 1 to 20,000.';return}
-const original=entries.slice();if(editing){const item=entries.find(e=>e.id===editing);if(!item){resetForm();return}Object.assign(item,{food,notes,calories:cal,category})}else{entries.push({id:String(Date.now())+'-'+Math.random().toString(36).slice(2),date:$('date').value,food,notes,calories:cal,category,created:Date.now()})}
+const original=entries.slice();if(editing){const item=entries.find(e=>e.id===editing);if(!item){resetForm();return}Object.assign(item,{food,notes,calories:cal,category});for(const k of ['carbs','fat','protein']){delete item[k];if(macros[k]!==undefined)item[k]=macros[k]}}else{entries.push({id:String(Date.now())+'-'+Math.random().toString(36).slice(2),date:$('date').value,food,notes,calories:cal,category,...macros,created:Date.now()})}
 if(!save()){entries=original;return}resetForm();render()});
 $('cancel').addEventListener('click',resetForm);
 $('meals').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const id=b.dataset.edit||b.dataset.delete;if(!id)return;const item=entries.find(x=>x.id===id);if(!item)return;
-if(b.dataset.edit){editing=id;$('food').value=item.food;$('notes').value=item.notes||'';$('calories').value=item.calories;$('category').value=item.category;$('formTitle').textContent='Edit meal';$('submit').textContent='Save changes';$('cancel').classList.remove('hidden');$('food').focus();$('formTitle').scrollIntoView({behavior:'smooth',block:'start'})}
+if(b.dataset.edit){editing=id;$('food').value=item.food;$('notes').value=item.notes||'';$('calories').value=item.calories;for(const k of ['carbs','fat','protein'])$(k).value=item[k]===undefined?'':item[k];$('category').value=item.category;$('formTitle').textContent='Edit meal';$('submit').textContent='Save changes';$('cancel').classList.remove('hidden');$('food').focus();$('formTitle').scrollIntoView({behavior:'smooth',block:'start'})}
 else if(confirm('Delete '+item.food+'?')){const original=entries;entries=entries.filter(x=>x.id!==id);if(!save())entries=original;render()}});
 $('history').addEventListener('click',e=>{const b=e.target.closest('[data-day]');if(b){$('date').value=b.dataset.day;resetForm();render();window.scrollTo({top:0,behavior:'smooth'})}});
 $('date').addEventListener('change',()=>{resetForm();render()});$('today').addEventListener('click',()=>{$('date').value=today();resetForm();render()});
@@ -93,13 +97,27 @@ const commonFoods=[
 {name:'RYSE Loaded Protein — Vanilla Ice Cream — 1 scoop',kcal:130,amount:'1 scoop (35 g); check your container label',terms:'ryse protein powder loaded whey vanilla ice cream shake'},
 {name:'RYSE Loaded Protein — Cinnamon Toast — 1 scoop',kcal:140,amount:'1 scoop (36 g); check your container label',terms:'ryse protein powder loaded whey cinnamon toast shake'}
 ];
+const knownMacros={
+'2% Milk':{carbs:12,fat:4.8,protein:8.1},
+'Whole Milk':{carbs:11.7,fat:7.9,protein:7.7},
+'1% Milk':{carbs:12.2,fat:2.4,protein:8.2},
+'Skim Milk':{carbs:12.5,fat:0.2,protein:8.3},
+'Granulated Sugar — 1 teaspoon':{carbs:4.2,fat:0,protein:0},
+'Granulated Sugar — 1 tablespoon':{carbs:12.6,fat:0,protein:0},
+'Strawberries — 1 cup':{carbs:12.7,fat:0.5,protein:1.1},
+'Strawberries — 100 g':{carbs:7.7,fat:0.3,protein:0.7},
+'Strawberries — 1 medium':{carbs:0.9,fat:0,protein:0.1},
+'Banana':{carbs:27,fat:0.4,protein:1.3},
+'Egg':{carbs:0.4,fat:4.8,protein:6.3}
+};
+function fillMacros(m){for(const k of ['carbs','fat','protein'])$(k).value=m&&m[k]!==undefined?Math.round(m[k]*10)/10:''}
 function commonMatches(q){const terms=q.toLowerCase().trim().split(/\s+/);return commonFoods.filter(f=>terms.every(t=>(f.name+' '+f.terms).toLowerCase().includes(t)))}
 function commonResult(f){
  const item=document.createElement('div');item.className='search-result';
  const name=document.createElement('strong');name.textContent=f.name;item.appendChild(name);
  const desc=document.createElement('div');desc.className='hint';desc.textContent=f.kcal+' calories · '+f.amount+' · Approximate reference value';item.appendChild(desc);
  const btn=document.createElement('button');btn.type='button';btn.className='secondary tiny';btn.textContent='Use this serving';
- btn.addEventListener('click',()=>{resetForm();$('food').value=f.name.slice(0,120);$('calories').value=f.kcal;$('notes').value=f.amount;$('formTitle').scrollIntoView({behavior:'smooth',block:'start'});$('searchStatus').textContent='Serving selected. Choose meal type and tap Add meal to save.'});
+ btn.addEventListener('click',()=>{resetForm();$('food').value=f.name.slice(0,120);$('calories').value=f.kcal;$('notes').value=f.amount;const key=Object.keys(knownMacros).find(k=>f.name.startsWith(k));fillMacros(key?knownMacros[key]:null);$('formTitle').scrollIntoView({behavior:'smooth',block:'start'});$('searchStatus').textContent='Serving selected. Choose meal type and tap Add meal to save.'});
  item.appendChild(btn);$('searchResults').appendChild(item);
 }
 function showCommon(q){$('searchResults').textContent='';const matches=commonMatches(q);matches.forEach(commonResult);return matches.length}
@@ -111,6 +129,7 @@ function energyPer100(p){
  const kj=Number(n.energy_100g);
  return Number.isFinite(kj)&&kj>=0&&kj<8400?kj/4.184:null;
 }
+function productMacros(p){const n=p.nutriments||{};const m={};for(const [k,key] of [['carbs','carbohydrates_100g'],['fat','fat_100g'],['protein','proteins_100g']]){const v=n[key];if(v!==undefined&&v!==null&&v!==''&&Number.isFinite(Number(v))&&Number(v)>=0&&Number(v)<=100)m[k]=Number(v)}return m}
 function showPortion(){
  const g=Number($('grams').value);
  $('portionCalories').textContent=selectedProduct&&g>0&&g<=10000?Math.round(selectedProduct.kcal*g/100)+' calories':'Enter a valid amount';
@@ -132,7 +151,7 @@ async function searchFoods(){
  const name=document.createElement('strong');name.textContent=p.displayName;item.appendChild(name);
  const desc=document.createElement('div');desc.className='hint';desc.textContent=[p.brands,p.quantity,Math.round(p.kcal)+' cal / 100 g',p.serving_size?'Serving: '+p.serving_size:''].filter(Boolean).join(' · ');item.appendChild(desc);
  const btn=document.createElement('button');btn.type='button';btn.className='secondary tiny';btn.textContent='Select food';btn.addEventListener('click',()=>{
- selectedProduct={name:p.displayName,brand:p.brands||'',kcal:p.kcal};
+ selectedProduct={name:p.displayName,brand:p.brands||'',kcal:p.kcal,macros:productMacros(p)};
  $('selectedFood').textContent=p.displayName+' · '+Math.round(p.kcal)+' calories per 100 g';
  $('grams').value='100';$('portionBox').classList.remove('hidden');showPortion();$('portionBox').scrollIntoView({behavior:'smooth',block:'nearest'});
  });item.appendChild(btn);$('searchResults').appendChild(item);
@@ -154,7 +173,7 @@ $('closeFood').addEventListener('click',()=>{$('portionBox').classList.add('hidd
 $('useFood').addEventListener('click',()=>{
  if(!selectedProduct)return;const g=Number($('grams').value);if(!Number.isFinite(g)||g<=0||g>10000){$('searchStatus').textContent='Enter an amount between 1 and 10,000.';return}
  const c=Math.round(selectedProduct.kcal*g/100);if(c<1||c>20000){$('searchStatus').textContent='This portion is outside the supported calorie range.';return}
- resetForm();$('food').value=selectedProduct.name.slice(0,120);$('calories').value=c;$('notes').value=(g+' g'+(selectedProduct.brand?' · '+selectedProduct.brand:'')).slice(0,240);
+ resetForm();$('food').value=selectedProduct.name.slice(0,120);$('calories').value=c;fillMacros(Object.fromEntries(Object.entries(selectedProduct.macros).map(([k,v])=>[k,v*g/100])));$('notes').value=(g+' g'+(selectedProduct.brand?' · '+selectedProduct.brand:'')).slice(0,240);
  $('portionBox').classList.add('hidden');$('formTitle').scrollIntoView({behavior:'smooth',block:'start'});$('searchStatus').textContent='Food selected. Choose meal type and tap Add meal to save.';
 });
 render();
