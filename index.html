@@ -17,7 +17,7 @@
 </head>
 <body>
 <main>
-<header><div class="pill">Free • Private on this device</div><div style="display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-top:12px"><h1>🥗 Food Tracker</h1><span id="appVersion" style="font-size:13px;font-weight:700;color:#607266;white-space:nowrap" aria-label="App version">v1.5.0</span></div><p class="sub">Track meals, calories, carbohydrates, fat, protein, and daily progress.</p></header>
+<header><div class="pill">Free • Private on this device</div><div style="display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-top:12px"><h1>🥗 Food Tracker</h1><span id="appVersion" style="font-size:13px;font-weight:700;color:#607266;white-space:nowrap" aria-label="App version">v1.6.0</span></div><p class="sub">Track meals, calories, carbohydrates, fat, protein, and daily progress.</p></header>
 <section class="card">
 <div class="row wrap"><h2 style="margin:0">Daily summary</h2><div class="row"><button class="secondary tiny" id="prev" aria-label="Previous day">‹</button><input class="date" id="date" type="date" aria-label="Selected date"><button class="secondary tiny" id="next" aria-label="Next day">›</button></div></div>
 <div class="row" style="margin-top:18px"><div><div class="muted small">Calories eaten</div><div class="metric" id="total">0</div></div><div style="text-align:right"><label for="goal" class="muted small" style="margin:0 0 5px">Daily goal</label><input id="goal" type="number" inputmode="numeric" min="1" max="20000" style="width:110px;text-align:right"></div></div>
@@ -244,10 +244,45 @@ function productMacros(p){const n=p.nutriments||{};const m={};for(const [k,key] 
 function upcFoodResult(food,source){
  const root=$('upcResults');root.textContent='';
  const card=document.createElement('div');card.className='search-result';
- const heading=document.createElement('strong');heading.textContent=food.name;card.appendChild(heading);
- const details=document.createElement('p');details.className='hint';details.textContent=source+' · '+food.kcal+' cal · '+food.carbs+' g carbs · '+food.fat+' g fat · '+food.protein+' g protein per '+food.serving;card.appendChild(details);
- const use=document.createElement('button');use.type='button';use.className='secondary tiny';use.textContent='Use / choose amount';use.addEventListener('click',()=>{commonResult({name:food.name,kcal:food.kcal,amount:food.serving,macros:{carbs:food.carbs,fat:food.fat,protein:food.protein}});const buttons=$('searchResults').querySelectorAll('button');if(buttons.length)buttons[buttons.length-1].click()});card.appendChild(use);
- const save=document.createElement('button');save.type='button';save.className='secondary tiny';save.style.marginLeft='8px';save.textContent='Save to my foods';save.addEventListener('click',()=>{library=library.filter(f=>!(f.name.toLowerCase()===food.name.toLowerCase()&&f.serving===food.serving));library.unshift(food);if(saveLibrary()){renderLibrary();$('upcStatus').textContent='Saved to My food library.'}});card.appendChild(save);root.appendChild(card);
+ const heading=document.createElement('strong');heading.textContent='Nutrition from '+source;card.appendChild(heading);
+ const note=document.createElement('p');note.className='hint';note.textContent='Compare these values with your package label. Edit any field before saving or adding a meal.';card.appendChild(note);
+ const form=document.createElement('form');form.noValidate=true;
+ const fields=[
+  {key:'name',label:'Product name',type:'text',max:120},
+  {key:'serving',label:'Serving size (for example, 1/3 pizza or 150 g)',type:'text',max:80},
+  {key:'kcal',label:'Calories per serving',type:'number',max:20000},
+  {key:'carbs',label:'Carbohydrates (g)',type:'number',max:2000},
+  {key:'fat',label:'Fat (g)',type:'number',max:2000},
+  {key:'protein',label:'Protein (g)',type:'number',max:2000}
+ ];
+ const inputs={};
+ for(const field of fields){
+  const label=document.createElement('label');const id='upcEdit_'+field.key;label.htmlFor=id;label.textContent=field.label;
+  const input=document.createElement('input');input.id=id;input.type=field.type;input.required=true;input.value=food[field.key]??'';
+  if(field.type==='number'){input.min='0';input.max=String(field.max);input.step=field.key==='kcal'?'1':'any';input.inputMode='decimal'}else input.maxLength=field.max;
+  inputs[field.key]=input;form.append(label,input);
+ }
+ const message=document.createElement('p');message.className='hint';message.setAttribute('role','status');form.appendChild(message);
+ function edited(){
+  const name=inputs.name.value.trim(),serving=inputs.serving.value.trim();
+  const kcal=Number(inputs.kcal.value),carbs=Number(inputs.carbs.value),fat=Number(inputs.fat.value),protein=Number(inputs.protein.value);
+  if(!name||!serving||!fields.slice(2).every(f=>inputs[f.key].value.trim()!==''))throw Error('Complete all nutrition fields.');
+  if(!Number.isInteger(kcal)||kcal<0||kcal>20000||![carbs,fat,protein].every(n=>Number.isFinite(n)&&n>=0&&n<=2000))throw Error('Enter valid calories and macros from the package label.');
+  return {name,serving,kcal,carbs,fat,protein};
+ }
+ const actions=document.createElement('div');actions.className='row wrap';actions.style.marginTop='12px';
+ const use=document.createElement('button');use.type='button';use.className='secondary tiny';use.textContent='Use / choose amount';use.addEventListener('click',()=>{
+  try{
+   const x=edited();const existing=$('upcServingResult');if(existing)existing.remove();
+   const item=document.createElement('div');item.id='upcServingResult';item.className='search-result';$('searchResults').prepend(item);
+   const btn=document.createElement('button');btn.type='button';btn.textContent='Select serving';item.appendChild(btn);
+   btn.addEventListener('click',()=>{item.remove();const common={name:x.name,kcal:x.kcal,amount:x.serving,macros:{carbs:x.carbs,fat:x.fat,protein:x.protein}};commonResult(common);const buttons=$('searchResults').querySelectorAll('button');buttons[buttons.length-1]?.click()});
+   btn.click();message.textContent='Nutrition loaded. Choose the number of servings.';
+  }catch(err){message.textContent=err.message}
+ });actions.appendChild(use);
+ const save=document.createElement('button');save.type='button';save.className='secondary tiny';save.textContent='Save corrected food';save.addEventListener('click',()=>{
+  try{const x=edited();library=library.filter(f=>!(f.name.toLowerCase()===x.name.toLowerCase()&&f.serving.toLowerCase()===x.serving.toLowerCase()));library.unshift(x);if(saveLibrary()){renderLibrary();message.textContent='Saved '+x.name+' with your corrected nutrition values.'}}catch(err){message.textContent=err.message}
+ });actions.appendChild(save);form.appendChild(actions);card.appendChild(form);root.appendChild(card);
 }
 function usdaBarcodeFood(p,code){
  if(!p||!p.description)return null;
