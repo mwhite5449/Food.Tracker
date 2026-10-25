@@ -13,15 +13,16 @@
 <title>Food Tracker • Meals & Calories</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#182820;background:#f3f7f2;font-size:16px}*{box-sizing:border-box}body{margin:0}main{max-width:740px;margin:auto;padding:24px 16px 75px}h1{font-size:32px;letter-spacing:-1px;margin:0}h2{font-size:20px;margin:0 0 14px}p{line-height:1.5}.sub{color:#607266;margin:5px 0 20px}.card{background:#fff;border:1px solid #e2eae2;border-radius:18px;padding:20px;margin:16px 0;box-shadow:0 3px 16px #183e2010}.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.wrap{flex-wrap:wrap}.metric{font-size:40px;font-weight:800;letter-spacing:-1.5px}.muted{color:#637267}.small{font-size:13px}.progress{height:13px;background:#e5eee6;border-radius:20px;overflow:hidden;margin:16px 0 7px}.bar{height:100%;width:0;background:#16a34a;transition:width .2s}.bar.over{background:#e19b35}label{display:block;font-weight:650;margin:13px 0 6px}input,select,button{font:inherit;min-height:46px;border-radius:10px}input,select{width:100%;padding:10px 12px;border:1px solid #b9c9bd;background:white;color:#182820}input:focus,select:focus{outline:2px solid #6fb981;outline-offset:1px}button{padding:10px 16px;border:0;background:#166534;color:white;font-weight:700;cursor:pointer}button:active{transform:scale(.99)}button.secondary{background:#eaf2ea;color:#175b30}button.danger{background:#fff0ee;color:#a52923}button.tiny{min-height:34px;padding:6px 10px;font-size:13px}button:disabled{opacity:.5;cursor:not-allowed}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.meal{padding:13px 0;border-bottom:1px solid #edf1ed}.meal:last-child{border:0}.meal-name{font-weight:700;overflow-wrap:anywhere}.meal-info{color:#617266;font-size:13px;margin-top:4px}.error{color:#af2925;min-height:18px;font-size:14px}.date{max-width:185px}.pill{display:inline-block;background:#e9f4e9;color:#23653a;border-radius:50px;padding:5px 10px;font-size:12px;font-weight:700}.dayrow{display:grid;grid-template-columns:1fr auto;gap:12px;padding:12px 0;border-bottom:1px solid #eaf0e9}.dayrow:last-child{border:0}.hidden{display:none!important}.hint{font-size:13px;color:#617266}footer{text-align:center;font-size:12px;color:#708175;padding:15px}@media(max-width:420px){.card{padding:16px}.metric{font-size:34px}.two{grid-template-columns:1fr}.row.tight{align-items:flex-start}h1{font-size:29px}}
-.search-results{max-height:320px;overflow:auto}.search-result{padding:12px 0;border-bottom:1px solid #eaf0e9}.search-result:last-child{border:0}.search-result button{margin-top:7px}.search-result strong{display:block}.search-status{min-height:18px} .macros{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:14px}.macro{background:#f1f7f0;border-radius:12px;padding:12px 8px;text-align:center}.macro strong{display:block;font-size:22px}.macro span{font-size:12px;color:#52675a}.macro-inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.macro-inputs label{font-size:13px}.macro-inputs input{min-width:0}@media(max-width:380px){.macros{gap:5px}.macro strong{font-size:18px}} .navlink{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px 10px;border-radius:10px;background:#166534;color:white;text-decoration:none;font-weight:700;min-height:44px}.navlink.secondary{background:#edf5ec;color:#166534}
-#barcodeScreen:target{display:block!important}
-main:has(#barcodeScreen:target)>section.card:not(#barcodeScreen){display:none!important}
+.search-results{max-height:320px;overflow:auto}.search-result{padding:12px 0;border-bottom:1px solid #eaf0e9}.search-result:last-child{border:0}.search-result button{margin-top:7px}.search-result strong{display:block}.search-status{min-height:18px} .macros{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:14px}.macro{background:#f1f7f0;border-radius:12px;padding:12px 8px;text-align:center}.macro strong{display:block;font-size:22px}.macro span{font-size:12px;color:#52675a}.macro-inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.macro-inputs label{font-size:13px}.macro-inputs input{min-width:0}@media(max-width:380px){.macros{gap:5px}.macro strong{font-size:18px}} .navlink{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px 10px;border-radius:10px;background:#166534;color:white;text-decoration:none;font-weight:700;min-height:44px}.navlink.secondary{background:#edf5ec;color:#166534}
+#barcodeScreen:target,#libraryScreen:target{display:block!important}
+main:has(#barcodeScreen:target)>section.card:not(#barcodeScreen),main:has(#libraryScreen:target)>section.card:not(#libraryScreen){display:none!important}
+@media(max-width:420px){nav[aria-label="Food Tracker screens"]{flex-wrap:wrap}nav[aria-label="Food Tracker screens"] .navlink{flex-basis:40%;font-size:13px}}
 </style>
 </head>
 <body>
 <main id="trackerHome">
-<header><div class="pill">Free • Private on this device</div><div style="display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-top:12px"><h1>🥗 Food Tracker</h1><span id="appVersion" style="font-size:13px;font-weight:700;color:#607266;white-space:nowrap" aria-label="App version">v1.7.2</span></div><p class="sub">Track meals, calories, carbohydrates, fat, protein, and daily progress.</p></header>
-<nav class="row" aria-label="Food Tracker screens" style="gap:8px;margin:12px 0 20px"><a href="#trackerHome" id="mainTab" class="navlink" aria-current="page">🏠 Meals & Summary</a><a href="#barcodeScreen" id="barcodeTab" class="navlink secondary" aria-current="false">📷 Barcode Lookup</a></nav>
+<header><div class="pill">Free • Private on this device</div><div style="display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-top:12px"><h1>🥗 Food Tracker</h1><span id="appVersion" style="font-size:13px;font-weight:700;color:#607266;white-space:nowrap" aria-label="App version">v1.8.0</span></div><p class="sub">Track meals, calories, carbohydrates, fat, protein, and daily progress.</p></header>
+<nav class="row" aria-label="Food Tracker screens" style="gap:8px;margin:12px 0 20px"><a href="#trackerHome" id="mainTab" class="navlink" aria-current="page">🏠 Meals & Summary</a><a href="#barcodeScreen" id="barcodeTab" class="navlink secondary" aria-current="false">📷 Barcode Lookup</a><a href="#libraryScreen" id="libraryTab" class="navlink secondary" aria-current="false">📚 My Foods</a></nav>
 <section class="card">
 <div class="row wrap"><h2 style="margin:0">Daily summary</h2><div class="row"><button class="secondary tiny" id="prev" aria-label="Previous day">‹</button><input class="date" id="date" type="date" aria-label="Selected date"><button class="secondary tiny" id="next" aria-label="Next day">›</button></div></div>
 <div class="row" style="margin-top:18px"><div><div class="muted small">Calories eaten</div><div class="metric" id="total">0</div></div><div style="text-align:right"><label for="goal" class="muted small" style="margin:0 0 5px">Daily goal</label><input id="goal" type="number" inputmode="numeric" min="1" max="20000" style="width:110px;text-align:right"></div></div>
@@ -30,7 +31,7 @@ main:has(#barcodeScreen:target)>section.card:not(#barcodeScreen){display:none!im
 <section class="card"><h2>☁️ Sync across devices</h2><p class="hint">Sign in with the same Google account on your home computer, work computer, and iPhone. Your existing meals and saved foods will be combined when you first sign in. Back up each device first.</p><div class="row wrap"><button id="cloudSignIn" type="button">Sign in with Google</button><button id="cloudSignOut" class="secondary" type="button" hidden>Sign out</button></div><p id="cloudStatus" class="hint" role="status">Loading cloud connection…</p><p class="hint">Cloud sync requires Google Authentication, Firestore, and private database rules to be enabled in Firebase Console.</p></section>
 <section class="card"><h2>🔎 Search food database</h2><p class="hint">Type a food or brand, then tap Search to find products online. Common foods appear as you type. Select a result, enter the amount you ate, then add it as a meal.</p><form id="searchForm"><label for="searchFood">Food or brand</label><div class="row"><input id="searchFood" type="search" placeholder="Start typing, e.g. Quaker oatmeal" minlength="2" autocomplete="off" required><button type="submit" id="searchBtn">Search</button></div></form><p id="searchStatus" class="hint search-status" role="status"></p><div id="searchResults" class="search-results"></div><p class="hint">Common foods are available even if the online database is unavailable.</p><div id="portionBox" class="hidden"><h2 style="margin-top:15px">Serving amount</h2><p id="selectedFood" class="muted"></p><label for="grams">Amount eaten (grams or mL for liquids)</label><input id="grams" type="number" min="1" max="10000" step="1" inputmode="decimal" value="100"><p id="portionCalories" class="pill"></p><div class="row wrap"><button id="useFood" type="button">Use this food</button><button id="closeFood" class="secondary" type="button">Cancel</button></div></div></section>
 <section class="card hidden" id="barcodeScreen"><h2>🔢 UPC / Barcode lookup</h2><p class="hint">Paste the UPC or GTIN from USDA FoodData Central or your food package. We'll try Open Food Facts, then USDA's limited public lookup.</p><form id="upcForm"><label for="upcInput">UPC / barcode (8–14 digits)</label><div class="row"><input id="upcInput" inputmode="numeric" pattern="[0-9]{8,14}" maxlength="14" placeholder="e.g. 012345678905" required><button type="submit" id="upcBtn">Look up</button></div></form><div class="row wrap" style="margin-top:12px"><button type="button" id="scanBarcode" class="secondary">📷 Scan barcode</button><button type="button" id="stopBarcode" class="secondary hidden">Stop camera</button></div><div id="barcodeCamera" class="hidden" style="max-width:460px;margin:12px auto;border-radius:12px;overflow:hidden"></div><p id="scanStatus" class="hint" role="status"></p><p id="upcStatus" class="hint" role="status"></p><div id="upcResults" class="search-results"></div></section>
-<section class="card"><h2>📚 My food library</h2><p class="hint">Save foods you use often. Your saved foods appear automatically when you search, even offline. The library stays on this device.</p><div id="libraryItems"></div><details><summary style="cursor:pointer;font-weight:700;margin:12px 0">Add a food from its nutrition label</summary><form id="libraryForm"><label for="libName">Product name</label><input id="libName" required maxlength="120" placeholder="e.g. Bush's Original Baked Beans"><label for="libServing">Serving description</label><input id="libServing" required maxlength="80" placeholder="e.g. 1/2 cup (130 g)"><div class="two"><div><label for="libCalories">Calories per serving</label><input id="libCalories" required type="number" min="0" max="20000" step="1"></div><div><label for="libCarbs">Carbs (g)</label><input id="libCarbs" required type="number" min="0" max="2000" step="any"></div><div><label for="libFat">Fat (g)</label><input id="libFat" required type="number" min="0" max="2000" step="any"></div><div><label for="libProtein">Protein (g)</label><input id="libProtein" required type="number" min="0" max="2000" step="any"></div></div><button type="submit">Save to my foods</button></form></details><p id="libraryStatus" class="hint" role="status"></p><p class="hint">Can't find the exact product? <a href="https://fdc.nal.usda.gov/food-search" target="_blank" rel="noopener noreferrer">Look it up in USDA FoodData Central</a>, then save its label values here.</p></section>
+<section class="card hidden" id="libraryScreen"><h2>📚 My food library</h2><p class="hint">Save foods you use often. Your saved foods appear automatically when you search, even offline. Your saved foods sync across signed-in devices.</p><div id="libraryItems"></div><details><summary style="cursor:pointer;font-weight:700;margin:12px 0">Add a food from its nutrition label</summary><form id="libraryForm"><label for="libName">Product name</label><input id="libName" required maxlength="120" placeholder="e.g. Bush's Original Baked Beans"><label for="libServing">Serving description</label><input id="libServing" required maxlength="80" placeholder="e.g. 1/2 cup (130 g)"><div class="two"><div><label for="libCalories">Calories per serving</label><input id="libCalories" required type="number" min="0" max="20000" step="1"></div><div><label for="libCarbs">Carbs (g)</label><input id="libCarbs" required type="number" min="0" max="2000" step="any"></div><div><label for="libFat">Fat (g)</label><input id="libFat" required type="number" min="0" max="2000" step="any"></div><div><label for="libProtein">Protein (g)</label><input id="libProtein" required type="number" min="0" max="2000" step="any"></div></div><button type="submit">Save to my foods</button></form></details><p id="libraryStatus" class="hint" role="status"></p><p class="hint">Can't find the exact product? <a href="https://fdc.nal.usda.gov/food-search" target="_blank" rel="noopener noreferrer">Look it up in USDA FoodData Central</a>, then save its label values here.</p></section>
 <section class="card"><h2 id="formTitle">Add a meal</h2>
 <form id="mealForm">
 <div class="two"><div><label for="category">Meal type</label><select id="category"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option></select></div><div><label for="calories">Calories</label><input id="calories" type="number" min="0" max="20000" step="1" inputmode="numeric" required placeholder="e.g. 450"></div></div>
@@ -45,30 +46,31 @@ main:has(#barcodeScreen:target)>section.card:not(#barcodeScreen){display:none!im
 <footer>Food Tracker • Food data from Open Food Facts contributors. Verify labels and portions. Meals are stored locally.</footer>
 </main>
 <script>
-// Keep navigation independent of food search and barcode database initialization.
+// Screen navigation is independent of nutrition lookups.
 (function(){
- const mainTab=document.getElementById('mainTab'),barcodeTab=document.getElementById('barcodeTab');
- const barcodeScreen=document.getElementById('barcodeScreen');
- const mainSections=Array.from(document.querySelectorAll('main > section.card')).filter(el=>el!==barcodeScreen);
+ const mainTab=document.getElementById('mainTab'),barcodeTab=document.getElementById('barcodeTab'),libraryTab=document.getElementById('libraryTab');
+ const barcodeScreen=document.getElementById('barcodeScreen'),libraryScreen=document.getElementById('libraryScreen');
+ const homeSections=Array.from(document.querySelectorAll('main > section.card')).filter(el=>el!==barcodeScreen&&el!==libraryScreen);
  function navigate(which){
-  const barcode=which==='barcode';
-  mainSections.forEach(el=>el.classList.toggle('hidden',barcode));
+  const barcode=which==='barcode',foods=which==='library',home=!barcode&&!foods;
+  homeSections.forEach(el=>el.classList.toggle('hidden',!home));
   barcodeScreen.classList.toggle('hidden',!barcode);
-  mainTab.classList.toggle('secondary',barcode);
-  barcodeTab.classList.toggle('secondary',!barcode);
-  mainTab.setAttribute('aria-current',barcode?'false':'page');
-  barcodeTab.setAttribute('aria-current',barcode?'page');
-  if(!barcode){
+  libraryScreen.classList.toggle('hidden',!foods);
+  for(const [tab,active] of [[mainTab,home],[barcodeTab,barcode],[libraryTab,foods]]){
+   tab.classList.toggle('secondary',!active);tab.setAttribute('aria-current',active?'page':'false');
+  }
+  if(home){
    const date=document.getElementById('date');
    const now=new Date(),today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
    if(date&&date.value!==today){date.value=today;date.dispatchEvent(new Event('change'))}
   }
   window.scrollTo(0,0);
  }
+ function fromHash(){navigate(location.hash==='#barcodeScreen'?'barcode':location.hash==='#libraryScreen'?'library':'main')}
  window.foodTrackerNavigate=navigate;
- window.addEventListener('hashchange',()=>navigate(location.hash==='#barcodeScreen'?'barcode':'main'));
- window.addEventListener('pageshow',()=>navigate(location.hash==='#barcodeScreen'?'barcode':'main'));
- navigate(location.hash==='#barcodeScreen'?'barcode':'main');
+ window.addEventListener('hashchange',fromHash);
+ window.addEventListener('pageshow',fromHash);
+ fromHash();
 })();
 </script>
 <script>
@@ -81,7 +83,46 @@ const safeDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(s);
 let entries=[],editing=null,selectedProduct=null,library=[];
 try{const v=JSON.parse(localStorage.getItem(LIBRARY)||'[]');if(Array.isArray(v))library=v.filter(x=>x&&typeof x.name==='string'&&typeof x.serving==='string'&&[x.kcal,x.carbs,x.fat,x.protein].every(n=>Number.isFinite(n)&&n>=0))}catch(e){}
 function saveLibrary(){try{localStorage.setItem(LIBRARY,JSON.stringify(library));window.dispatchEvent(new Event('foodtracker-local-change'));return true}catch(e){$('libraryStatus').textContent='Could not save your food library.';return false}}
-function renderLibrary(){const root=$('libraryItems');root.textContent='';if(!library.length){root.textContent='No saved foods yet.';return}for(const [i,f] of library.entries()){const row=document.createElement('div');row.className='meal row';const label=document.createElement('div');label.className='meal-name';label.textContent=f.name+' · '+f.kcal+' cal / '+f.serving;const del=document.createElement('button');del.className='danger tiny';del.type='button';del.textContent='Remove';del.addEventListener('click',()=>{library.splice(i,1);saveLibrary();renderLibrary();showCommon($('searchFood').value.trim())});row.append(label,del);root.append(row)}}
+function renderLibrary(){
+ const root=$('libraryItems');root.textContent='';
+ if(!library.length){root.textContent='No saved foods yet.';return}
+ for(const [i,f] of library.entries()){
+  const row=document.createElement('div');row.className='meal';row.style.padding='12px 0';
+  const label=document.createElement('strong');label.textContent=f.name;row.appendChild(label);
+  const desc=document.createElement('p');desc.className='hint';desc.textContent=f.serving+' · '+f.kcal+' cal · '+f.fat+' g fat · '+f.carbs+' g carbs · '+f.protein+' g protein';row.appendChild(desc);
+  const actions=document.createElement('div');actions.className='row wrap';
+  const edit=document.createElement('button');edit.type='button';edit.className='secondary tiny';edit.textContent='Edit';
+  const del=document.createElement('button');del.className='danger tiny';del.type='button';del.textContent='Remove';
+  del.addEventListener('click',()=>{if(!confirm('Remove '+f.name+' from your saved foods?'))return;library.splice(i,1);saveLibrary();renderLibrary();showCommon($('searchFood').value.trim())});
+  edit.addEventListener('click',()=>{
+   const existing=row.querySelector('.libraryEditForm');if(existing){existing.remove();return}
+   const form=document.createElement('form');form.className='libraryEditForm';form.style.marginTop='12px';
+   const fields=[['name','Product name','text',120],['serving','Serving size','text',80],['kcal','Calories','number',20000],['fat','Fat (g)','number',2000],['carbs','Carbs (g)','number',2000],['protein','Protein (g)','number',2000]];
+   const inputs={};
+   for(const [key,title,type,max] of fields){
+    const lab=document.createElement('label');lab.textContent=title;const input=document.createElement('input');input.type=type;input.value=f[key]??'';input.required=true;
+    if(type==='number'){input.min='0';input.max=String(max);input.step=key==='kcal'?'1':'any';input.inputMode='decimal'}else input.maxLength=max;
+    inputs[key]=input;lab.appendChild(input);form.appendChild(lab);
+   }
+   const msg=document.createElement('p');msg.className='hint';msg.setAttribute('role','status');
+   const submit=document.createElement('button');submit.type='submit';submit.textContent='Save changes';
+   const cancel=document.createElement('button');cancel.type='button';cancel.className='secondary';cancel.textContent='Cancel';cancel.style.marginLeft='8px';cancel.addEventListener('click',()=>form.remove());
+   form.append(submit,cancel,msg);
+   form.addEventListener('submit',event=>{
+    event.preventDefault();
+    const name=inputs.name.value.trim(),serving=inputs.serving.value.trim();
+    const kcal=Number(inputs.kcal.value),fat=Number(inputs.fat.value),carbs=Number(inputs.carbs.value),protein=Number(inputs.protein.value);
+    if(!name||!serving||['kcal','fat','carbs','protein'].some(k=>inputs[k].value.trim()==='')||!Number.isInteger(kcal)||kcal<0||kcal>20000||![fat,carbs,protein].every(n=>Number.isFinite(n)&&n>=0&&n<=2000)){msg.textContent='Check the serving and nutrition numbers.';return}
+    const duplicate=library.some((item,j)=>j!==i&&item.name.toLowerCase()===name.toLowerCase()&&item.serving.toLowerCase()===serving.toLowerCase());
+    if(duplicate){msg.textContent='Another saved food already has that name and serving size.';return}
+    const old={...f};Object.assign(f,{name,serving,kcal,fat,carbs,protein});
+    if(saveLibrary()){renderLibrary();showCommon($('searchFood').value.trim());$('libraryStatus').textContent='Updated '+name+'.'}else{Object.assign(f,old);msg.textContent='Unable to save changes.'}
+   });
+   row.appendChild(form);inputs.name.focus();
+  });
+  actions.append(edit,del);row.appendChild(actions);root.appendChild(row);
+ }
+}
 $('libraryForm').addEventListener('submit',e=>{e.preventDefault();const name=$('libName').value.trim(),serving=$('libServing').value.trim(),kcal=Number($('libCalories').value),carbs=Number($('libCarbs').value),fat=Number($('libFat').value),protein=Number($('libProtein').value);if(!name||!serving||![kcal,carbs,fat,protein].every(v=>Number.isFinite(v)&&v>=0)){return}library=library.filter(f=>!(f.name.toLowerCase()===name.toLowerCase()&&f.serving.toLowerCase()===serving.toLowerCase()));library.unshift({name,serving,kcal,carbs,fat,protein});if(saveLibrary()){$('libraryForm').reset();$('libraryStatus').textContent='Saved '+name+' to your food library.';renderLibrary();showCommon($('searchFood').value.trim())}});
 renderLibrary();
 try{const parsed=JSON.parse(localStorage.getItem(STORE)||'[]');if(Array.isArray(parsed))entries=parsed.filter(validEntry)}catch(e){}
