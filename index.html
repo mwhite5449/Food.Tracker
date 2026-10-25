@@ -17,7 +17,7 @@
 </head>
 <body>
 <main>
-<header><div class="pill">Free • Private on this device</div><div style="display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-top:12px"><h1>🥗 Food Tracker</h1><span id="appVersion" style="font-size:13px;font-weight:700;color:#607266;white-space:nowrap" aria-label="App version">v1.7.0</span></div><p class="sub">Track meals, calories, carbohydrates, fat, protein, and daily progress.</p></header>
+<header><div class="pill">Free • Private on this device</div><div style="display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-top:12px"><h1>🥗 Food Tracker</h1><span id="appVersion" style="font-size:13px;font-weight:700;color:#607266;white-space:nowrap" aria-label="App version">v1.7.1</span></div><p class="sub">Track meals, calories, carbohydrates, fat, protein, and daily progress.</p></header>
 <nav class="row" aria-label="Food Tracker screens" style="gap:8px;margin:12px 0 20px"><button type="button" id="mainTab" style="flex:1" aria-current="page">🏠 Meals & Summary</button><button type="button" id="barcodeTab" class="secondary" style="flex:1" aria-current="false">📷 Barcode Lookup</button></nav>
 <section class="card">
 <div class="row wrap"><h2 style="margin:0">Daily summary</h2><div class="row"><button class="secondary tiny" id="prev" aria-label="Previous day">‹</button><input class="date" id="date" type="date" aria-label="Selected date"><button class="secondary tiny" id="next" aria-label="Next day">›</button></div></div>
@@ -41,6 +41,34 @@
 <section class="card"><h2>Back up your meals</h2><p class="hint">Your entries stay in this browser's storage, not in the public GitHub repository. Browser data removal, private browsing, or changing devices can erase them. Export backups regularly.</p><div class="row wrap"><button class="secondary" id="export" type="button">Download backup</button><button class="secondary" id="import" type="button">Import backup</button><input id="backup" class="hidden" type="file" accept=".json,application/json"></div><p id="backupStatus" class="hint" role="status"></p></section>
 <footer>Food Tracker • Food data from Open Food Facts contributors. Verify labels and portions. Meals are stored locally.</footer>
 </main>
+<script>
+// Keep navigation independent of food search and barcode database initialization.
+(function(){
+ const mainTab=document.getElementById('mainTab'),barcodeTab=document.getElementById('barcodeTab');
+ const barcodeScreen=document.getElementById('barcodeScreen');
+ const mainSections=Array.from(document.querySelectorAll('main > section.card')).filter(el=>el!==barcodeScreen);
+ function navigate(which){
+  const barcode=which==='barcode';
+  mainSections.forEach(el=>el.classList.toggle('hidden',barcode));
+  barcodeScreen.classList.toggle('hidden',!barcode);
+  mainTab.classList.toggle('secondary',barcode);
+  barcodeTab.classList.toggle('secondary',!barcode);
+  mainTab.setAttribute('aria-current',barcode?'false':'page');
+  barcodeTab.setAttribute('aria-current',barcode?'page');
+  if(!barcode){
+   const date=document.getElementById('date');
+   const now=new Date(),today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
+   if(date&&date.value!==today){date.value=today;date.dispatchEvent(new Event('change'))}
+  }
+  window.scrollTo(0,0);
+ }
+ window.foodTrackerNavigate=navigate;
+ mainTab.addEventListener('click',()=>navigate('main'));
+ barcodeTab.addEventListener('click',()=>navigate('barcode'));
+ window.addEventListener('pageshow',()=>navigate('main'));
+ navigate('main');
+})();
+</script>
 <script>
 (function(){
 'use strict';
@@ -243,15 +271,9 @@ function energyPer100(p){
 }
 function productMacros(p){const n=p.nutriments||{};const m={};for(const [k,key] of [['carbs','carbohydrates_100g'],['fat','fat_100g'],['protein','proteins_100g']]){const v=n[key];if(v!==undefined&&v!==null&&v!==''&&Number.isFinite(Number(v))&&Number(v)>=0&&Number(v)<=100)m[k]=Number(v)}return m}
 function showScreen(which){
- const barcode=which==='barcode';
- document.querySelectorAll('main > section.card').forEach(section=>section.classList.toggle('hidden',barcode?section.id!=='barcodeScreen':section.id==='barcodeScreen'));
- $('mainTab').classList.toggle('secondary',barcode);$('barcodeTab').classList.toggle('secondary',!barcode);
- $('mainTab').setAttribute('aria-current',barcode?'false':'page');$('barcodeTab').setAttribute('aria-current',barcode?'page');
- if(!barcode&&barcodeScanner)stopBarcodeCamera();
- window.scrollTo({top:0,behavior:'smooth'});
+ window.foodTrackerNavigate(which);
+ if(which!=='barcode'&&barcodeScanner)stopBarcodeCamera();
 }
-$('mainTab').addEventListener('click',()=>showScreen('main'));
-$('barcodeTab').addEventListener('click',()=>showScreen('barcode'));
 function upcFoodResult(food,source){
  const root=$('upcResults');root.textContent='';
  const card=document.createElement('div');card.className='search-result';
